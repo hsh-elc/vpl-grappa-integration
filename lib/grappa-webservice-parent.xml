@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.hsh.grappa</groupId>
+    <artifactId>grappa-webservice-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>2.4.1</version>
+
+    <name>grappa-webservice</name>
+    <description>A web service for connecting multiple Learn Management Systems (e.g. moodle, LON-CAPA) to multiple
+        automatic graders (e.g. aSQLg, graja) with a unified interface
+    </description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
+        <de.hsh.grappa.grappa-util.version>0.2.1</de.hsh.grappa.grappa-util.version>
+        <de.hsh.grappa.grappa-backendplugin.version>0.2.1</de.hsh.grappa.grappa-backendplugin.version>
+        <de.hsh.grappa.grappa-backendplugin-dockerproxy.version>0.2.1
+        </de.hsh.grappa.grappa-backendplugin-dockerproxy.version>
+        <de.hsh.grappa.grappa-webservice.version>2.4.1</de.hsh.grappa.grappa-webservice.version>
+        <proforma.proformaxml.version>0.2.1</proforma.proformaxml.version>
+        <proforma.proformautil.version>0.2.1</proforma.proformautil.version>
+        <proforma.proformaxml-2-1.version>0.2.1</proforma.proformaxml-2-1.version>
+        <proforma.proformautil-2-1.version>0.2.1</proforma.proformautil-2-1.version>
+    </properties>
+
+    <modules>
+        <module>proformaxml</module>
+        <module>proformautil</module>
+        <module>proformaxml-2-1</module>
+        <module>proformautil-2-1</module>
+        <module>grappa-util</module>
+        <module>grappa-backendplugin</module>
+        <module>grappa-webservice</module>
+        <module>grappa-backendplugin-dockerproxy</module>
+        <!--        <module>grappa-grader-environment-vagrant</module>-->
+        <module>grappa-backendstarter</module>
+        <module>grappa-backendplugin-dummygrader</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>de.hsh.grappa</groupId>
+                <artifactId>grappa-util</artifactId>
+                <version>${de.hsh.grappa.grappa-util.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.hsh.grappa</groupId>
+                <artifactId>grappa-backendplugin</artifactId>
+                <version>${de.hsh.grappa.grappa-backendplugin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.hsh.grappa</groupId>
+                <artifactId>grappa-backendplugin-dockerproxy</artifactId>
+                <version>${de.hsh.grappa.grappa-backendplugin-dockerproxy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.hsh.grappa</groupId>
+                <artifactId>grappa-webservice</artifactId>
+                <version>${de.hsh.grappa.grappa-webservice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>proforma</groupId>
+                <artifactId>proformaxml</artifactId>
+                <version>${proforma.proformaxml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>proforma</groupId>
+                <artifactId>proformautil</artifactId>
+                <version>${proforma.proformautil.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>proforma</groupId>
+                <artifactId>proformaxml-2-1</artifactId>
+                <version>${proforma.proformaxml-2-1.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>proforma</groupId>
+                <artifactId>proformautil-2-1</artifactId>
+                <version>${proforma.proformautil-2-1.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.3.11</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.docker-java</groupId>
+                <artifactId>docker-java-core</artifactId>
+                <version>3.3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.docker-java</groupId>
+                <artifactId>docker-java-api</artifactId>
+                <version>3.3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.docker-java</groupId>
+                <artifactId>docker-java-transport-httpclient5</artifactId>
+                <version>3.3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.9</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.9</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>1.20</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>2.3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>2.3.8</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!--    <dependencies>-->
+    <!--        <dependency>-->
+    <!--            <groupId>junit</groupId>-->
+    <!--            <artifactId>junit</artifactId>-->
+    <!--            <version>4.11</version>-->
+    <!--            <scope>test</scope>-->
+    <!--        </dependency>-->
+    <!--    </dependencies>-->
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <compilerArgs>
+                            <arg>-Xlint:all</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.7.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
