@@ -13,8 +13,8 @@ export GRADER_NAME="Graja"
 export GRADER_VERSION="2.3"
 
 # Submission settings
-# Feedback type - options: "zip" or "xml"
-export FEEDBACK_TYPE="zip"
+# Feedback format - options: "zip" or "xml"
+export FEEDBACK_FORMAT="zip"
 # Feedback structure - options: "merged-test-feedback" or "separate-test-feedback"
 export FEEDBACK_STRUCTURE="merged-test-feedback"
 # Student feedback level - options: "debug", "info", "warn", "error"
