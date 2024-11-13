@@ -28,13 +28,13 @@ Install all project dependencies locally, including any parent dependencies requ
 2. **Install `proformautil`**
 
    ```shell
-   mvn install:install-file -Dfile=./lib/proformautil-0.2.1-jar-with-dependencies.jar -DgroupId=proforma -DartifactId=proformautil -Dversion=0.2.1 -Dpackaging=jar
+   mvn install:install-file -Dfile=./lib/proformautil-0.2.1.jar -DgroupId=proforma -DartifactId=proformautil -Dversion=0.2.1 -Dpackaging=jar
    ```
 
 3. **Install `proformautil-2-1`**
 
    ```shell
-   mvn install:install-file -Dfile=./lib/proformautil-2-1-0.2.1-jar-with-dependencies.jar -DgroupId=proforma -DartifactId=proformautil-2-1 -Dversion=0.2.1 -Dpackaging=jar
+   mvn install:install-file -Dfile=./lib/proformautil-2-1-0.2.1.jar -DgroupId=proforma -DartifactId=proformautil-2-1 -Dversion=0.2.1 -Dpackaging=jar
    ```
 
 4. **Install `proformaxml`**
@@ -46,7 +46,7 @@ Install all project dependencies locally, including any parent dependencies requ
 5. **Install `proformaxml-2-1`**
 
    ```shell
-   mvn install:install-file -Dfile=./lib/proformaxml-2-1-0.2.1-jar-with-dependencies.jar -DgroupId=proforma -DartifactId=proformaxml-2-1 -Dversion=0.2.1 -Dpackaging=jar
+   mvn install:install-file -Dfile=./lib/proformaxml-2-1-0.2.1.jar -DgroupId=proforma -DartifactId=proformaxml-2-1 -Dversion=0.2.1 -Dpackaging=jar
    ```
 
 ### Step 2: Build Fat JAR
