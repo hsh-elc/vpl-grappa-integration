@@ -7,10 +7,10 @@ This guide provides steps to recreate the Maven project, install necessary depen
 - Install **JRE 17** as it is required for this project.
 - Ensure the following files are available and stored in a directory named **lib** in the project root:
   - grappa-webservice-parent.xml
-  - proformautil-0.2.1-jar-with-dependencies.jar
-  - proformautil-2-1-0.2.1-jar-with-dependencies.jar
+  - proformautil-0.2.1.jar
+  - proformautil-2-1-0.2.1.jar
   - proformaxml-0.2.1.jar
-  - proformaxml-2-1-0.2.1-jar-with-dependencies.ja
+  - proformaxml-2-1-0.2.1.jar
 
 ### Step 1: Install Project Dependencies Locally
 
