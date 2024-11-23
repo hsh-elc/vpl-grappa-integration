@@ -98,8 +98,6 @@ Uploading can be accomplished by:
 
    In the "Execution files" tab, the ProFormA task file must be uploaded under a folder named `task` for the program to function correctly. Since VPL unzips uploaded ZIP files automatically, you should follow these steps based on the type of file you are uploading:
 
-   Handling ProFormA Task Files:
-   
    a. **If the task file is a ProFormA ZIP file** (e.g., `helloworld.zip`):
       - Within your file system, locate the ZIP file containing the ProFormA task file (e.g., `helloworld.zip`).
       - Place this ZIP file inside a folder named `task`.
@@ -192,4 +190,4 @@ This example illustrates how to use the Based-On feature with a base activity.
 
 ---
 
-This installation and usage guide provides the necessary steps to install, configure, and utilize ProFormA with VPL in Moodle. For additional details, please refer to the [thesis](https://serwiss.bib.hs-hannover.de/frontdoor/deliver/index/docId/3176/file/Thesis_Latest.pdf) and [official VPL documentation](https://vpl.dis.ulpgc.es/).
+This installation and usage guide provides the necessary steps to install, configure, and utilize ProFormA with VPL in Moodle. For additional details, please refer to the [thesis](https://doi.org/10.25968/opus-3176) and [official VPL documentation](https://vpl.dis.ulpgc.es/).
