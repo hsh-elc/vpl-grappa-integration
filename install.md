@@ -91,7 +91,7 @@ Uploading can be accomplished by:
 
 3. **Upload the ProFormAFormatter Fat Jar**:
 
-   Upload the ProFormAFormatter fat jar directly into the "Execution files" tab. This file serves as a bridge between VPL and Grappa, enabling ProFormA-based communication with graders.
+   Upload the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` directly into the "Execution files" tab. This file serves as a bridge between VPL and Grappa, enabling ProFormA-based communication with graders.
    <img src="images/img_11.png" width="920px">
 
 4. **Upload the ProFormA Task File**:
@@ -123,7 +123,7 @@ Uploading can be accomplished by:
 
 5. **Mark Files to Keep When Running**:
    
-   Mark `proforma_settings.sh`, the `ProFormAFormatter` fat jar, and the ProFormA task file in the `task` folder as "Files to Keep When Running" to prevent them from being deleted after execution.
+   Mark `proforma_settings.sh`, the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`, and the ProFormA task file in the `task` folder as "Files to Keep When Running" to prevent them from being deleted after execution.
    <img src="images/img_3.png" width="732px">
 
 ---
@@ -133,7 +133,7 @@ Uploading can be accomplished by:
 The "Based-On" feature in VPL allows you to create a generic "Base Activity" that serves as a template for other VPL activities, streamlining setup. A detailed example is described in the section [Based-On Example](#example-2-using-a-based-on-base-activity-for-new-activities).
 
 1. **Create a Base Activity**:
-   Set up a VPL activity in Moodle with essential configurations, including execution scripts, grading settings, and "Files to Keep When Running" (such as `proforma_settings.sh` and the `ProFormAFormatter` fat jar).
+   Set up a VPL activity in Moodle with essential configurations, including execution scripts, grading settings, and "Files to Keep When Running" (such as `proforma_settings.sh` and the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`).
 2. **Execution Files Inheritance**:
    Execution files in the base activity will automatically apply to new activities created with the "Based-on" feature. Custom scripts like `vpl_evaluate.sh` will be appended from the base if the current activity contains its own version.
 3. **Configure Expiration and Hide Base Activity**:
@@ -159,10 +159,10 @@ This example demonstrates how to create a basic new VPL activity and integrate i
    - Set the name and description.
    - Configure the "Maximum number of files" setting as required.
 2. **Upload ProFormA Integration Files**:
-   - In "Execution files", upload `vpl_evaluate.sh`, `proforma_settings.sh`, and the ProFormAFormatter fat jar directly.
+   - In "Execution files", upload `vpl_evaluate.sh`, `proforma_settings.sh`, and the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` directly.
    - Create a folder named `task` in "Execution files" and upload the ProFormA task file into this `task` folder.
 3. **Mark Files to Keep**:
-   Go to "More/Files to keep when running" and mark `proforma_settings.sh`, the `ProFormAFormatter` fat jar, and the ProFormA task file within the `task` folder.
+   Go to "More/Files to keep when running" and mark `proforma_settings.sh`, the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`, and the ProFormA task file within the `task` folder.
 4. **Finalize Activity Configuration**:
    Under "Execution options", set "Run", "Debug", and "Evaluate" to "Yes" to enable these features for students.
 5. **Testing**:
@@ -178,9 +178,9 @@ This example illustrates how to use the Based-On feature with a base activity.
    - Create a VPL activity that will serve as a base for other VPL activities.
    - Under "Settings", remove the "due date" to keep it accessible throughout the entirety of hte course duration.
    - Hide the activity from students to maintain a clean course structure.
-   - Upload the execution scripts (custom `vpl_evaluate.sh` script and `proforma_settings.sh` script) and the `ProFormAFormatter` fat jar to "Execution files".
+   - Upload the execution scripts (custom `vpl_evaluate.sh` script and `proforma_settings.sh` script) and the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` to "Execution files".
    - In "Execution options", set "Run", "Debug", and "Evaluate" to "Yes".
-   - Go to "More/Files to Keep When Running" and check the boxes for `proforma_settings.sh` and the `ProFormAFormatter` fat jar.
+   - Go to "More/Files to Keep When Running" and check the boxes for `proforma_settings.sh` and the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`.
 2. **Create a New Activity Based on the Base Activity**:
    - Create a new VPL activity in your course.
    - In "Execution options", select the base activity from the previous step in the "Based-on" dropdown.
