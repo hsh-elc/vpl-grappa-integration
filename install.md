@@ -116,6 +116,8 @@ Uploading can be accomplished by:
         ```
       - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the ProFormA task file inside the `task` folder.
    
+       <img src="images/img_12.png" width="717px">
+
    b. **If the task file is an XML file** (e.g., `helloworld.xml`):
       - Place the `helloworld.xml` file directly into a folder named `task`.
       - Zip the entire `task` folder. The resulting structure should look like this:
@@ -124,8 +126,6 @@ Uploading can be accomplished by:
         ├── helloworld.xml
         ```
       - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the `helloworld.xml` file inside the `task` folder.
-
-   <img src="images/img_12.png" width="717px">
 
 5. **Mark Files to Keep When Running**:
    
