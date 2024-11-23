@@ -67,8 +67,34 @@ Navigate to "More/Execution files" to upload the necessary files.
    - Upload the ProFormAFormatter fat jar directly into the "Execution files" tab. This file serves as a bridge between VPL and Grappa, enabling ProFormA-based communication with graders.
      ![img_11.png](images/img_11.png)
 4. **Upload the ProFormA Task File**:
-   - In the "Execution files" tab, create a folder named `task` and upload the ProFormA ZIP or XML task file into this `task` folder.
-     ![img_12.png](images/img_12.png)
+   - In the "Execution files" tab, the ProFormA task file must be uploaded under a folder named `task` for the program to function correctly. One thing to note here is that VPL always unzips uploaded zipped files automatically. To get around that, follow these steps based on the type of file you are uploading:
+
+   #### Handling ProFormA Task Files
+   
+   1. **If the task file is a ProFormA ZIP file** (e.g., `de.hsh.prog.helloworld.zip`):
+      - Within your file system, create a ZIP file containing the ProFormA task file (e.g., `de.hsh.prog.helloworld.zip`).
+      - Place this ZIP file inside a folder named `task`.
+      - Zip the entire `task` folder. The resulting structure should look like this:
+        ```
+        task
+        ├── de.hsh.prog.helloworld.zip
+        ```
+      - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the ProFormA task file inside the `task` folder.
+   
+   2. **If the task file is an XML file** (e.g., `task.xml`):
+      - Place the `task.xml` file directly into a folder named `task`.
+      - Zip the entire `task` folder. The resulting structure should look like this:
+        ```
+        task
+        ├── task.xml
+        ```
+      - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the `task.xml` file inside the `task` folder.
+
+   #### Tips for Uploading
+   - **Drag-and-Drop**: Use the drag-and-drop feature to upload the ZIP file directly into the VPL interface. This method is faster than navigating through the file system.
+     - **Save Changes**: Always save your changes after uploading by pressing `Ctrl + S` or clicking the "Save" button in the interface.
+
+![img_12.png](images/img_12.png)
 5. **Mark Files to Keep When Running**:
    - Mark `proforma_settings.sh`, the `ProFormAFormatter` fat jar, and the ProFormA task file in the `task` folder as "Files to Keep When Running" to prevent them from being deleted after execution.
      ![img_3.png](images/img_3.png)
