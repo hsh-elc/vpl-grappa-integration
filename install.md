@@ -46,11 +46,13 @@ In Moodle, navigate to **Site administration > Plugins > Plugins overview > mod_
 
    - In Moodle, go to your course and create a new VPL activity. Name and describe the activity for clarity.
    - If students need to submit multiple files, set "Maximum number of files" to a number greater than 1 under "Submission restrictions".
+
      <img src="images/img.png" width="605px">
 
 2. **Configure Execution Settings**:
 
    Go to "Execution options" and enable the "Run", "Debug", and "Evaluate" settings to allow students to execute and submit code.
+
    <img src="images/img_1.png" width="858px">
 
 3. **Optional Configuration**:
@@ -58,8 +60,11 @@ In Moodle, navigate to **Site administration > Plugins > Plugins overview > mod_
    - Set a "Based on" activity for this activity. See the [Based-On Feature](#3-using-the-based-on-feature-to-simplify-activity-setup) section for details.
    - Enable "Evaluate just on submission" and "Automatic grade". Refer to the [Execution Options Configuration](https://vpl.dis.ulpgc.es/documentation/vpl-3.4.3+/basicfeatures.html#selecting-programming-language-tools) for more information.
    - Under "More/Maximum execution resources limits", configure the resource limits per student submissions if needed.
+
      <img src="images/img_2.png" width="536px">
+
    - In "Requested files", specify files that will be visible to students during the task (e.g., library files or starter code). Refer to the [Execution Options Configuration](https://vpl.dis.ulpgc.es/documentation/vpl-3.4.3+/basicfeatures.html#requested-files) for more information.
+
      <img src="images/img_8.png" width="1006px">
 
 ---
@@ -82,16 +87,19 @@ Uploading can be accomplished by:
 1. **Replace `vpl_evaluate.sh`**:
    
    Upload the customized `vpl_evaluate.sh` script in the "Execution files" tab to replace the default VPL script. This script enables ProFormA-based grading. 
+
    <img src="images/img_9.png" width="722px">
 
 2. **Add `proforma_settings.sh`**:
 
    Upload the `proforma_settings.sh` script in the same "Execution files" tab. This file lets instructors configure the grader (e.g., Graja, GraFlap) and set grading parameters.
+
    <img src="images/img_10.png" width="722px">
 
 3. **Upload the ProFormAFormatter Fat Jar**:
 
    Upload the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` directly into the "Execution files" tab. This file serves as a bridge between VPL and Grappa, enabling ProFormA-based communication with graders.
+
    <img src="images/img_11.png" width="722px">
 
 4. **Upload the ProFormA Task File**:
@@ -122,6 +130,7 @@ Uploading can be accomplished by:
 5. **Mark Files to Keep When Running**:
    
    Mark `proforma_settings.sh`, the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`, and the ProFormA task file in the `task` folder as "Files to Keep When Running" to prevent them from being deleted after execution.
+
    <img src="images/img_3.png" width="595px">
 
 ---
@@ -131,15 +140,25 @@ Uploading can be accomplished by:
 The "Based-On" feature in VPL allows you to create a generic "Base Activity" that serves as a template for other VPL activities, streamlining setup. A detailed example is described in the section [Based-On Example](#example-2-using-a-based-on-base-activity-for-new-activities).
 
 1. **Create a Base Activity**:
+
    Set up a VPL activity in Moodle with essential configurations, including execution scripts, grading settings, and "Files to Keep When Running" (such as `proforma_settings.sh` and the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`).
+
 2. **Execution Files Inheritance**:
+
    Execution files in the base activity will automatically apply to new activities created with the "Based-on" feature. Custom scripts like `vpl_evaluate.sh` will be appended from the base if the current activity contains its own version.
+
 3. **Configure Expiration and Hide Base Activity**:
+
    - Set the base activity with no due date to ensure it's available for the entire course duration.
+
      <img src="images/img_6.png" width="608px">
+
    - Hide the base activity from students to avoid confusion by setting its visibility to "Hidden".
+
      <img src="images/img_7.png" width="628px">
+
 4. **Choose How to Use the Base Activity**:
+
    - When `proforma_settings.sh` is included in the base activity's "Execution files", all inheriting activities will share this configuration. To specify a different grader or settings, override the base `proforma_settings.sh` file by adding a new one in the inheriting activity.
    - Alternatively, you can create multiple base activities, each configured for a different ProFormA grader.
    - It is also possible to layer base activities. For example, create a primary base activity that defines core execution scripts, then add secondary base activities for specific `proforma_settings.sh` configurations, allowing flexible inheritance across multiple activities.
