@@ -6,13 +6,13 @@ This guide provides step-by-step instructions for installing and using the ProFo
 
 ## Part 1: Installation
 
-### 1. Install the VPL Plugin on Moodle
+### A. Install the VPL Plugin on Moodle
 1. **Introduction**: The VPL plugin enables automatic assessment of programming tasks within Moodle.
 2. **Download & Install**: Refer to the [Moodle Plugin Directory](https://moodle.org/plugins/view.php?plugin=mod_vpl) for plugin download and installation instructions.
 
 ---
 
-### 2. Set Up the Jail-Server
+### B. Set Up the Jail-Server
 1. **Purpose**: The Jail-Server is a secure sandbox environment where student code is executed and assessed.
 
 2. **Installation Steps**:
@@ -28,7 +28,7 @@ This guide provides step-by-step instructions for installing and using the ProFo
 
 ---
 
-### 3: Configure the VPL Plugin
+### C: Configure the VPL Plugin
 In Moodle, navigate to **Site administration > Plugins > Plugins overview > mod_vpl > Settings** to configure the VPL plugin for communication with the Jail-Server.
 
 1. **Add the Jail-Server URL**: Enter the Jail-Server URL you set up in the previous step into the **Execution servers list**.
@@ -51,16 +51,16 @@ In Moodle, navigate to **Site administration > Plugins > Plugins overview > mod_
 2. **Configure Execution Settings**:
 
    Go to "Execution options" and enable the "Run", "Debug", and "Evaluate" settings to allow students to execute and submit code.
-   <img src="images/img1.png" width="858px">
+   <img src="images/img_1.png" width="858px">
 
 3. **Optional Configuration**:
 
    - Set a "Based on" activity for this activity. See the [Based-On Feature](#3-using-the-based-on-feature-to-simplify-activity-setup) section for details.
    - Enable "Evaluate just on submission" and "Automatic grade". Refer to the [Execution Options Configuration](https://vpl.dis.ulpgc.es/documentation/vpl-3.4.3+/basicfeatures.html#selecting-programming-language-tools) for more information.
    - Under "More/Maximum execution resources limits", configure the resource limits per student submissions if needed.
-     <img src="images/img2.png" width="536px">
+     <img src="images/img_2.png" width="536px">
    - In "Requested files", specify files that will be visible to students during the task (e.g., library files or starter code). Refer to the [Execution Options Configuration](https://vpl.dis.ulpgc.es/documentation/vpl-3.4.3+/basicfeatures.html#requested-files) for more information.
-     <img src="images/img8.png" width="1006px">
+     <img src="images/img_8.png" width="1006px">
 
 ---
 
