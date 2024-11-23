@@ -107,6 +107,7 @@ Uploading can be accomplished by:
    In the "Execution files" tab, the ProFormA task file must be uploaded under a folder named `task` for the program to function correctly. Since VPL unzips uploaded ZIP files automatically, you should follow these steps based on the type of file you are uploading:
 
    a. **If the task file is a ProFormA ZIP file** (e.g., `helloworld.zip`):
+
       - Within your file system, locate the ZIP file containing the ProFormA task file (e.g., `helloworld.zip`).
       - Place this ZIP file inside a folder named `task`.
       - Zip the entire `task` folder. The resulting structure should look like this:
@@ -114,8 +115,7 @@ Uploading can be accomplished by:
         task
         ├── helloworld.zip
         ```
-      - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the ProFormA task file inside the `task` folder.
-   
+      - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the ProFormA task file inside the `task` folder.\
        <img src="images/img_12.png" width="717px">
 
    b. **If the task file is an XML file** (e.g., `helloworld.xml`):
