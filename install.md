@@ -65,7 +65,7 @@ In Moodle, navigate to **Site administration > Plugins > Plugins overview > mod_
 
    - In "Requested files", specify files that will be visible to students during the task (e.g., library files or starter code). Refer to the [Execution Options Configuration](https://vpl.dis.ulpgc.es/documentation/vpl-3.4.3+/basicfeatures.html#requested-files) for more information.
 
-     <img src="images/img_8.png" width="1006px">
+     <img src="images/img_8.png" width="727px">
 
 ---
 
