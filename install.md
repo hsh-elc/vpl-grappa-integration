@@ -82,17 +82,17 @@ Uploading can be accomplished by:
 1. **Replace `vpl_evaluate.sh`**:
    
    Upload the customized `vpl_evaluate.sh` script in the "Execution files" tab to replace the default VPL script. This script enables ProFormA-based grading. 
-   <img src="images/img_9.png" width="918px">
+   <img src="images/img_9.png" width="722px">
 
 2. **Add `proforma_settings.sh`**:
 
    Upload the `proforma_settings.sh` script in the same "Execution files" tab. This file lets instructors configure the grader (e.g., Graja, GraFlap) and set grading parameters.
-   <img src="images/img_10.png" width="927px">
+   <img src="images/img_10.png" width="722px">
 
 3. **Upload the ProFormAFormatter Fat Jar**:
 
    Upload the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` directly into the "Execution files" tab. This file serves as a bridge between VPL and Grappa, enabling ProFormA-based communication with graders.
-   <img src="images/img_11.png" width="920px">
+   <img src="images/img_11.png" width="722px">
 
 4. **Upload the ProFormA Task File**:
 
@@ -117,12 +117,12 @@ Uploading can be accomplished by:
         ```
       - Upload this outer ZIP file. VPL will unzip it, creating the required directory structure with the `helloworld.xml` file inside the `task` folder.
 
-   <img src="images/img_12.png" width="918px">
+   <img src="images/img_12.png" width="717px">
 
 5. **Mark Files to Keep When Running**:
    
    Mark `proforma_settings.sh`, the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar`, and the ProFormA task file in the `task` folder as "Files to Keep When Running" to prevent them from being deleted after execution.
-   <img src="images/img_3.png" width="732px">
+   <img src="images/img_3.png" width="595px">
 
 ---
 
