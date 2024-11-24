@@ -1,4 +1,4 @@
-# Installation Guide
+# Build Guide
 
 This guide provides steps to recreate the Maven project, install necessary dependencies, and produce a fat JAR file for the project.
 
