@@ -43,8 +43,17 @@ Uploading can be accomplished by:
 
 - **Drag-and-Drop**: Use the drag-and-drop feature to upload the ZIP file directly into the VPL interface. This method is faster than navigating through the file system.   
 - **Import**: Expand the tool bar with the "+" symbol and then click the Import symbol (upwards arrow). Or try the keyboard shortcut `Ctrl + I`.
-- **ZIP files**: One thing to note is that VPL always unzips uploaded zipped files automatically. VPL seems to deny uploading of ZIP files with UTF-8 encoded filenames.
+- **ZIP Files**:  
+When working with ZIP files in VPL, keep the following in mind:  
+   - **Automatic Extraction**:  
+   VPL automatically extracts the contents of uploaded ZIP files.  
+   - **Encoding Limitation**:  
+   VPL only supports ZIP files with CP437-encoded filenames. Files with UTF-8 encoded filenames will be rejected.  
+   - **Relevance of Double-Zipping**:  
+   Since double-zipping is already required for the ProFormA task file, this process inherently avoids the encoding issue. The inner ZIP file containing the task files remains unexposed to VPL’s encoding restrictions. Refer to point 4 in the [Files to be uploaded](#files-to-be-uploaded) for more details.
+
 - **Save Changes**: Always save your changes after uploading by pressing `Ctrl + S` or clicking the "Save" button in the interface.
+
 
 #### Files to be uploaded
 
@@ -66,7 +75,7 @@ Uploading can be accomplished by:
 
    <img src="images/img_11.png" width="722px">
 
-4. **Upload the ProFormA Task File**:
+4. ### **Upload the ProFormA Task File**:
 
    In the "Execution files" tab, the ProFormA task file must be uploaded under a folder named `task` for the program to function correctly. Since VPL unzips uploaded ZIP files automatically, you should follow these steps based on the type of file you are uploading:
 
