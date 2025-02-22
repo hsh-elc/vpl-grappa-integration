@@ -64,7 +64,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.abp.vpl_proforma.ProformaFormatter</mainClass>
+                            <mainClass>org.abp.vpl_proforma.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -79,7 +79,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>org.abp.vpl_proforma.ProformaFormatter</mainClass>
+                            <mainClass>org.abp.vpl_proforma.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

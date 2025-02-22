@@ -112,8 +112,10 @@ public class GradingHintsHelper {
         List<GradesBaseRefChildType> refs = elem.getTestRefOrCombineRef();
         if (refs != null) {
             for (GradesBaseRefChildType ref : refs) {
-                if (ref.getWeight() != null) {
-                    ref.setWeight(ref.getWeight() * factor);
+                if (ref instanceof GradesTestRefChildType) {
+                    if (ref.getWeight() != null) {
+                        ref.setWeight(ref.getWeight() * factor);
+                    }
                 }
 
                 // Handle nullify-conditions and nullify-condition adjustments
@@ -146,6 +148,10 @@ public class GradingHintsHelper {
                 }
             }
         }
+    }
+
+    public GradesNodeType getCombineNode(String refId) {
+        return gradingHintsCombines.get(refId);
     }
 }
 

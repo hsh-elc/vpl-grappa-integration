@@ -1,4 +1,4 @@
-package org.abp.vpl_proforma.config;
+package org.abp.vpl_proforma.submission.config;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
