@@ -79,6 +79,7 @@ public class Main {
 
         TaskType taskPojo = proformaSubmissionFormatter.getTaskType(taskFilename);
 
+        // This works, it is only commented out for development purposes
         // Check if the task is cached on the middleware server
         // String taskFileUUID = taskPojo.getUuid();
         // try {

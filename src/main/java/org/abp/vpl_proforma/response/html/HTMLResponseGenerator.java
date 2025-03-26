@@ -128,7 +128,6 @@ public class HTMLResponseGenerator {
         System.out.println("--|>");
     }
 
-    // ... [Include all the private HTML helper methods from ProformaResponseFormatter]
     private Element initializeHtmlDocument(Document doc) {
         Element html = doc.createElement("html");
         doc.appendChild(html);

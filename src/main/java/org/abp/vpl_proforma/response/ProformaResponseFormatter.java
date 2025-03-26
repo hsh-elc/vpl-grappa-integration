@@ -15,6 +15,13 @@ import proforma.xml21.TestResponseType;
 import proforma.xml21.TestResultType;
 import proforma.xml21.TestType;
 import proforma.xml21.TestsResponseType;
+import proforma.xml21.GradesNullifyConditionType;
+import proforma.xml21.GradesNullifyComparisonOperandType;
+import proforma.xml21.GradesNullifyCombineRefType;
+import proforma.xml21.GradesNullifyTestRefType;
+import proforma.xml21.GradesNullifyLiteralType;
+import proforma.xml21.GradesNullifyConditionsType;
+import proforma.xml21.GradesNullifyBaseType;
 
 import org.abp.vpl_proforma.response.gradingstructure.CombineNode;
 import org.abp.vpl_proforma.response.gradingstructure.GradingNode;
@@ -33,12 +40,13 @@ public class ProformaResponseFormatter {
     private GradingHintsType taskGradingHintsElem;
     private TestsType taskTestElem;
     private HTMLResponseGenerator htmlGenerator;
-
+    private GradingHintsHelper gradingHintsHelper;
     public ProformaResponseFormatter(ResponseType responsePojo, GradingHintsType taskGradingHintsElem, TestsType taskTestElem) {
         this.responsePojo = responsePojo;
         this.taskGradingHintsElem = taskGradingHintsElem;
         this.taskTestElem = taskTestElem;
         this.htmlGenerator = new HTMLResponseGenerator();
+        this.gradingHintsHelper = new GradingHintsHelper(taskGradingHintsElem, taskTestElem);
     }
 
     public void processResult(double maxScoreLMS) {
@@ -58,10 +66,13 @@ public class ProformaResponseFormatter {
         // Process scores and grading structure
         Map<String, Map<String, Double>> scores = processAllTestScores(separateTestFeedback.getTestsResponse());
         CombineNode gradingStructure = processGradingNode(taskGradingHintsElem.getRoot(), 
-            separateTestFeedback.getTestsResponse(), scores, 1.0, 
-            new GradingHintsHelper(taskGradingHintsElem, taskTestElem), 0);
+            separateTestFeedback.getTestsResponse(), scores, 1.0, 0);
 
+        // Process nullification conditions
+        processNullifyConditions(taskGradingHintsElem.getRoot(), gradingStructure);
+        updateScoreOfCombineNode(gradingStructure);
 
+        // Output debugging information
         debugPrintGradingStructure(gradingStructure, "");
     }
 
@@ -132,14 +143,12 @@ public class ProformaResponseFormatter {
      * @param testsResponse The tests response containing test results
      * @param scoresMap Map containing test scores
      * @param weight Weight to apply to the node's score
-     * @param gradingHintsHelper Helper for grading hints calculations
      * @param indentLevel Current indent level for visual hierarchy
      * @return Processed CombineNode containing the grading structure
      */
     private CombineNode processGradingNode(GradesNodeType node, TestsResponseType testsResponse, 
                                         Map<String, Map<String, Double>> scoresMap,
-                                        double weight, GradingHintsHelper gradingHintsHelper, 
-                                        int indentLevel) {
+                                        double weight, int indentLevel) {
         String refId = node.getId() != null ? node.getId() : "root";
         String title = node.getTitle() != null ? node.getTitle() : refId;
         String description = node.getDescription() != null ? node.getDescription() : "";
@@ -164,7 +173,7 @@ public class ProformaResponseFormatter {
                                 childScores, processedChildren);
                 } else if (ref instanceof GradesCombineRefChildType combineRef) {
                     processCombineRef(combineRef, testsResponse, scoresMap, 
-                                    gradingHintsHelper, indentLevel,
+                                    indentLevel,
                                     childScores, processedChildren);
                 }
             }
@@ -238,7 +247,7 @@ public class ProformaResponseFormatter {
 
     private void processCombineRef(GradesCombineRefChildType combineRef, TestsResponseType testsResponse,
                                 Map<String, Map<String, Double>> scoresMap,
-                                GradingHintsHelper gradingHintsHelper, int indentLevel,
+                                int indentLevel,
                                 List<Double> childScores, List<GradingNode> processedChildren) {
         String refId = combineRef.getRef();
         GradesNodeType combineNode = gradingHintsHelper.getCombineNode(refId);
@@ -247,7 +256,6 @@ public class ProformaResponseFormatter {
             double weight = combineRef.getWeight() != null ? combineRef.getWeight() : 1.0;
             CombineNode processedCombineNode = processGradingNode(combineNode, testsResponse,
                                                                 scoresMap, weight,
-                                                                gradingHintsHelper,
                                                                 indentLevel + 1);
             childScores.add(processedCombineNode.getActualScore());
             processedChildren.add(processedCombineNode);
@@ -331,16 +339,311 @@ public class ProformaResponseFormatter {
                 .forEach(teacherFeedback::add);
     }
 
+    /**
+     * Process nullification conditions for a node and its children recursively.
+     * 
+     * @param node The GradingHints XML node to process nullification conditions for
+     * @param rootProcessed The root of the processed grading structure
+     */
+    private void processNullifyConditions(GradesNodeType node, CombineNode rootProcessed) {
+        String refId = node.getId() != null ? node.getId() : "root";
+        CombineNode processedNode = (CombineNode) findNodeInProcessedStructure(rootProcessed, refId);
+        
+        // Check if node was already processed
+        if (processedNode.isNullificationChecked()) {
+            return;
+        }
+        
+        // Process test-ref elements
+        List<GradesBaseRefChildType> refs = node.getTestRefOrCombineRef();
+        if (refs != null) {
+            for (GradesBaseRefChildType ref : refs) {
+                if (ref instanceof GradesTestRefChildType testRef) {
+                    String testRefId = testRef.getRef();
+                    String subRefId = testRef.getSubRef() != null ? testRef.getSubRef() : "";
 
-    // Debugging methods
+                    GradingNode processedTestNode = findNodeInProcessedStructure(rootProcessed, testRefId, subRefId);
+                    if (processedTestNode != null && processedTestNode.getRawScore() != 0) {
+                        boolean result = false;
+                        
+                        if (testRef.getNullifyConditions() != null) {
+                            result = processCompositeNullifyConditions(testRef.getNullifyConditions(), rootProcessed);
+                        } else if (testRef.getNullifyCondition() != null) {
+                            result = processSingleNullifyCondition(testRef.getNullifyCondition(), rootProcessed);
+                        }
+                        
+                        if (result) {
+                            processedTestNode.setNullified(true);
+                            String nullifyTitle = "";
+                            String nullifyDescription = "";
+                            
+                            if (testRef.getNullifyConditions() != null) {
+                                nullifyTitle = testRef.getNullifyConditions().getTitle() != null ? 
+                                    testRef.getNullifyConditions().getTitle() : "";
+                                nullifyDescription = testRef.getNullifyConditions().getDescription() != null ? 
+                                    testRef.getNullifyConditions().getDescription() : "";
+                            } else if (testRef.getNullifyCondition() != null) {
+                                nullifyTitle = testRef.getNullifyCondition().getTitle() != null ? 
+                                    testRef.getNullifyCondition().getTitle() : "";
+                                nullifyDescription = testRef.getNullifyCondition().getDescription() != null ? 
+                                    testRef.getNullifyCondition().getDescription() : "";
+                            }
+                            
+                            String nullifyReason = nullifyTitle;
+                            if (!nullifyDescription.isEmpty()) {
+                                nullifyReason += ":<br>" + nullifyDescription;
+                            }
+                            processedTestNode.setNullifyReason(nullifyReason);
+                        }
+                    }
+                } else if (ref instanceof GradesCombineRefChildType combineRef) {
+                    String combineRefId = combineRef.getRef();
+                    GradingNode processedCombineNode = findNodeInProcessedStructure(rootProcessed, combineRefId);
+                    
+                    if (processedCombineNode != null && processedCombineNode.getRawScore() != 0) {
+                        boolean result = false;
+                        
+                        if (combineRef.getNullifyConditions() != null) {
+                            result = processCompositeNullifyConditions(combineRef.getNullifyConditions(), rootProcessed);
+                        } else if (combineRef.getNullifyCondition() != null) {
+                            result = processSingleNullifyCondition(combineRef.getNullifyCondition(), rootProcessed);
+                        }
+                        
+                        if (result) {
+                            processedCombineNode.setNullified(true);
+                            String nullifyTitle = "";
+                            String nullifyDescription = "";
+                            
+                            if (combineRef.getNullifyConditions() != null) {
+                                nullifyTitle = combineRef.getNullifyConditions().getTitle() != null ? 
+                                    combineRef.getNullifyConditions().getTitle() : "";
+                                nullifyDescription = combineRef.getNullifyConditions().getDescription() != null ? 
+                                    combineRef.getNullifyConditions().getDescription() : "";
+                            } else if (combineRef.getNullifyCondition() != null) {
+                                nullifyTitle = combineRef.getNullifyCondition().getTitle() != null ? 
+                                    combineRef.getNullifyCondition().getTitle() : "";
+                                nullifyDescription = combineRef.getNullifyCondition().getDescription() != null ? 
+                                    combineRef.getNullifyCondition().getDescription() : "";
+                            }
+                            
+                            String nullifyReason = nullifyTitle;
+                            if (!nullifyDescription.isEmpty()) {
+                                nullifyReason += ":<br>" + nullifyDescription;
+                            }
+                            processedCombineNode.setNullifyReason(nullifyReason);
+                        }
+                    }
+                    
+                    // Recursively process the combine node
+                    GradesNodeType combineNode = gradingHintsHelper.getCombineNode(combineRefId);
+                    if (combineNode != null) {
+                        processNullifyConditions(combineNode, rootProcessed);
+                    }
+                }
+            }
+        }
+        
+        updateScoreOfCombineNode(processedNode);
+        processedNode.setNullificationChecked(true);
+    }
 
-    private void debugPrintGradingStructure(CombineNode node, String prefix) {
+    /**
+     * Process a single nullify condition.
+     * 
+     * @param nullifyCondition The nullify condition to process
+     * @param rootProcessed The root of the processed grading structure
+     * @return true if the condition is met, false otherwise
+     */
+    private boolean processSingleNullifyCondition(GradesNullifyConditionType nullifyCondition, CombineNode rootProcessed) {
+        String compareOp = nullifyCondition.getCompareOp();
+        double operand1 = 0, operand2 = 0;
+        boolean operand1Set = false, operand2Set = false;
+
+        List<GradesNullifyComparisonOperandType> operands = nullifyCondition.getNullifyCombineRefOrNullifyTestRefOrNullifyLiteral();
+        for (GradesNullifyComparisonOperandType operand : operands) {
+            if (operand instanceof GradesNullifyCombineRefType nullifyCombineRef) {
+                String refId = nullifyCombineRef.getRef();
+                GradingNode gradingNode = findNodeInProcessedStructure(rootProcessed, refId);
+                
+                if (gradingNode instanceof CombineNode combineNode && !combineNode.isNullificationChecked()) {
+                    GradesNodeType xmlCombineNode = gradingHintsHelper.getCombineNode(refId);
+                    if (xmlCombineNode != null) {
+                        processNullifyConditions(xmlCombineNode, rootProcessed);
+                    }
+                }
+                
+                if (gradingNode != null) {
+                    if (!operand1Set) {
+                        operand1 = gradingNode.getRawScore();
+                        operand1Set = true;
+                    } else {
+                        operand2 = gradingNode.getRawScore();
+                        operand2Set = true;
+                    }
+                }
+            } else if (operand instanceof GradesNullifyTestRefType nullifyTestRef) {
+                String refId = nullifyTestRef.getRef();
+                String subRefId = nullifyTestRef.getSubRef() != null ? nullifyTestRef.getSubRef() : "";
+                GradingNode gradingNode = findNodeInProcessedStructure(rootProcessed, refId, subRefId);
+                
+                if (gradingNode != null) {
+                    if (!operand1Set) {
+                        operand1 = gradingNode.getRawScore();
+                        operand1Set = true;
+                    } else {
+                        operand2 = gradingNode.getRawScore();
+                        operand2Set = true;
+                    }
+                }
+            } else if (operand instanceof GradesNullifyLiteralType nullifyLiteral) {
+                double value = nullifyLiteral.getValue().doubleValue();
+                if (!operand1Set) {
+                    operand1 = value;
+                    operand1Set = true;
+                } else {
+                    operand2 = value;
+                    operand2Set = true;
+                }
+            }
+        }
+
+        if (!(operand1Set && operand2Set)) {
+            return false;
+        }
+
+        return compareOperands(operand1, operand2, compareOp);
+    }
+
+    /**
+     * Compare two operands using the specified comparison operator.
+     * 
+     * @param operand1 First operand
+     * @param operand2 Second operand
+     * @param compareOp Comparison operator
+     * @return Result of the comparison
+     */
+    private boolean compareOperands(double operand1, double operand2, String compareOp) {
+        return switch (compareOp) {
+            case "eq" -> operand1 == operand2;
+            case "ne" -> operand1 != operand2;
+            case "gt" -> operand1 > operand2;
+            case "ge" -> operand1 >= operand2;
+            case "lt" -> operand1 < operand2;
+            case "le" -> operand1 <= operand2;
+            default -> false;
+        };
+    }
+
+    /**
+     * Process composite nullify conditions.
+     * 
+     * @param nullifyConditions The composite nullify conditions to process
+     * @param rootProcessed The root of the processed grading structure
+     * @return true if the conditions are met, false otherwise
+     */
+    private boolean processCompositeNullifyConditions(GradesNullifyConditionsType nullifyConditions, CombineNode rootProcessed) {
+        String composeOp = nullifyConditions.getComposeOp();
+        List<Boolean> results = new ArrayList<>();
+
+        List<GradesNullifyBaseType> conditions = nullifyConditions.getNullifyConditionsOrNullifyCondition();
+        for (GradesNullifyBaseType condition : conditions) {
+            boolean result = false;
+            if (condition instanceof GradesNullifyConditionsType nestedConditions) {
+                result = processCompositeNullifyConditions(nestedConditions, rootProcessed);
+            } else if (condition instanceof GradesNullifyConditionType singleCondition) {
+                result = processSingleNullifyCondition(singleCondition, rootProcessed);
+            }
+            results.add(result);
+        }
+
+        if ("and".equals(composeOp)) {
+            return results.stream().allMatch(result -> result);
+        } else if ("or".equals(composeOp)) {
+            return results.stream().anyMatch(result -> result);
+        }
+        return false;
+    }
+
+    /**
+     * Find a node in the processed grading structure by its ID.
+     * 
+     * @param currentNode Current node being examined
+     * @param refId Reference ID to find
+     * @return The found node or null if not found
+     */
+    private GradingNode findNodeInProcessedStructure(GradingNode currentNode, String refId) {
+        return findNodeInProcessedStructure(currentNode, refId, "");
+    }
+
+    /**
+     * Find a node in the processed grading structure by its ID and optional subtest ID.
+     * 
+     * @param currentNode Current node being examined
+     * @param refId Reference ID to find
+     * @param subRefId Subtest reference ID
+     * @return The found node or null if not found
+     */
+    private GradingNode findNodeInProcessedStructure(GradingNode currentNode, String refId, String subRefId) {
+        if (currentNode.getRefId().equals(refId)) {
+            if (currentNode instanceof TestNode testNode) {
+                if (!subRefId.isEmpty() && testNode.getSubRefId().equals(subRefId)) {
+                    return testNode; // Match found with specific subRefId
+                } else if (subRefId.isEmpty()) {
+                    return testNode; // Match found without needing to check subRefId
+                }
+            } else if (currentNode instanceof CombineNode) {
+                return currentNode;
+            }
+        }
+
+        // If the current node is a CombineNode, iterate through its children
+        if (currentNode instanceof CombineNode combineNode) {
+            for (GradingNode child : combineNode.getChildren()) {
+                GradingNode foundNode = findNodeInProcessedStructure(child, refId, subRefId);
+                if (foundNode != null) {
+                    return foundNode;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update the score of a combine node based on its non-nullified children's scores.
+     * 
+     * @param combineNode The combine node to update
+     */
+    private void updateScoreOfCombineNode(CombineNode combineNode) {
+        double sum = 0.0;
+        List<Double> childrenScores = new ArrayList<>();
+        
+        for (GradingNode child : combineNode.getChildren()) {
+            if (!child.isNullified()) {
+                childrenScores.add(child.getActualScore());
+            }
+        }
+        
+        if (!childrenScores.isEmpty()) {
+            sum = switch (combineNode.getFunction()) {
+                case "sum" -> childrenScores.stream().mapToDouble(Double::doubleValue).sum();
+                case "min" -> childrenScores.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+                case "max" -> childrenScores.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+                default -> 0.0;
+            };
+        }
+        
+        combineNode.setActualScore(sum * combineNode.getWeight());
+    }
+
+
+     // Debugging methods
+     private void debugPrintGradingStructure(CombineNode node, String prefix) {
         System.out.println("\n=== DEBUG: Grading Structure ===");
-        printNode(node, "");
+        debugPrintNode(node, "");
         System.out.println("==============================\n");
     }
     
-    private void printNode(GradingNode node, String indent) {
+    private void debugPrintNode(GradingNode node, String indent) {
         // Basic node information
         System.out.println(indent + "Node Type: " + node.getType());
         System.out.println(indent + "ID: " + node.getRefId());
@@ -350,7 +653,15 @@ public class ProformaResponseFormatter {
         System.out.println(indent + "  - Raw Score: " + node.getRawScore());
         System.out.println(indent + "  - Weight: " + node.getWeight());
         System.out.println(indent + "  - Max Score: " + node.getMaxScore());
-        System.out.println(indent + "  - Actual Score: " + node.getActualScore());
+        double finalScore = node.isNullified() ? 0 : node.getActualScore();
+        System.out.println(indent + "  - Actual Score: " + finalScore);
+        
+        // Add nullification information
+        System.out.println(indent + "Nullification:");
+        System.out.println(indent + "  - Is Nullified: " + node.isNullified());
+        if (node.isNullified() && node.getNullifyReason() != null && !node.getNullifyReason().isEmpty()) {
+            System.out.println(indent + "  - Nullify Reason: " + node.getNullifyReason());
+        }
     
         if (node instanceof TestNode testNode) {
             System.out.println(indent + "Test Node Specific:");
@@ -369,6 +680,7 @@ public class ProformaResponseFormatter {
             //     testNode.getTeacherFeedback().forEach(fb -> 
             //         System.out.println(indent + "    * " + fb));
             // }
+
         } else if (node instanceof CombineNode combineNode) {
             System.out.println(indent + "Combine Node Specific:");
             System.out.println(indent + "  - Function: " + combineNode.getFunction());
@@ -379,7 +691,7 @@ public class ProformaResponseFormatter {
                 System.out.println(indent + "  - Children:");
                 combineNode.getChildren().forEach(child -> {
                     System.out.println(indent + "    ----");
-                    printNode(child, indent + "    ");
+                    debugPrintNode(child, indent + "    ");
                 });
             }
         }
