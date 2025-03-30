@@ -1,8 +1,7 @@
 package org.abp.vpl_proforma.submission.config;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.*;
 
 public class ProformaConfig {
     private String serviceURL;
@@ -15,113 +14,65 @@ public class ProformaConfig {
     private String studentFeedbackLevel;
     private String teacherFeedbackLevel;
 
+    private static final List<String> REQUIRED_KEYS = Arrays.asList(
+        "SERVICE_URL", "LMS_ID", "LMS_PASSWORD", "GRADER_NAME", "GRADER_VERSION", 
+        "FEEDBACK_FORMAT", "FEEDBACK_STRUCTURE", "STUDENT_FEEDBACK_LEVEL", "TEACHER_FEEDBACK_LEVEL"
+    );
+    
     public ProformaConfig(String fileName) throws IOException {
         loadConfigFromFile(fileName);
     }
 
-    public String getServiceURL() {
-        return serviceURL;
-    }
-
-    public void setServiceURL(String serviceURL) {
-        this.serviceURL = serviceURL;
-    }
-
-    public String getLmsID() {
-        return lmsID;
-    }
-
-    public void setLmsID(String lmsID) {
-        this.lmsID = lmsID;
-    }
-
-    public String getLmsPassword() {
-        return lmsPassword;
-    }
-
-    public void setLmsPassword(String lmsPassword) {
-        this.lmsPassword = lmsPassword;
-    }
-
-    public String getGraderName() {
-        return graderName;
-    }
-
-    public void setGraderName(String graderName) {
-        this.graderName = graderName;
-    }
-
-    public String getGraderVersion() {
-        return graderVersion;
-    }
-
-    public void setGraderVersion(String graderVersion) {
-        this.graderVersion = graderVersion;
-    }
-
-    public String getFeedbackFormat() {
-        return feedbackFormat;
-    }
-
-    public void setFeedbackFormat(String feedbackFormat) {
-        this.feedbackFormat = feedbackFormat;
-    }
-
-    public String getFeedbackStructure() {
-        return feedbackStructure;
-    }
-
-    public void setFeedbackStructure(String feedbackStructure) {
-        this.feedbackStructure = feedbackStructure;
-    }
-
-    public String getStudentFeedbackLevel() {
-        return studentFeedbackLevel;
-    }
-
-    public void setStudentFeedbackLevel(String studentFeedbackLevel) {
-        this.studentFeedbackLevel = studentFeedbackLevel;
-    }
-
-    public String getTeacherFeedbackLevel() {
-        return teacherFeedbackLevel;
-    }
-
-    public void setTeacherFeedbackLevel(String teacherFeedbackLevel) {
-        this.teacherFeedbackLevel = teacherFeedbackLevel;
-    }
-
-    /**
-     * Reads configuration values from the 'proforma_settings.sh' script needed for grader and submission settings.
-     */
     private void loadConfigFromFile(String fileName) throws IOException {
-        try (BufferedReader proformaSettingsFile = new BufferedReader(new FileReader(fileName))) {
+        Map<String, String> configMap = new HashMap<>();
+        
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             String line;
-
-            while ((line = proformaSettingsFile.readLine()) != null) {
-                if (line.startsWith("export SERVICE_URL=")) {
-                    this.serviceURL = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export LMS_ID=")) {
-                    this.lmsID = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export LMS_PASSWORD=")) {
-                    this.lmsPassword = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export GRADER_NAME=")) {
-                    this.graderName = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export GRADER_VERSION=")) {
-                    this.graderVersion = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export FEEDBACK_FORMAT=")) {
-                    this.feedbackFormat = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export FEEDBACK_STRUCTURE=")) {
-                    this.feedbackStructure = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export STUDENT_FEEDBACK_LEVEL=")) {
-                    this.studentFeedbackLevel = line.substring(line.indexOf("=") + 2, line.length() - 1);
-                } else if (line.startsWith("export TEACHER_FEEDBACK_LEVEL=")) {
-                    this.teacherFeedbackLevel = line.substring(line.indexOf("=") + 2, line.length() - 1);
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("export ")) {
+                    String[] parts = line.replace("export ", "").split("=", 2);
+                    if (parts.length == 2) {
+                        configMap.put(parts[0].trim(), parts[1].replaceAll("\"", "").trim());
+                    }
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Error opening file: " + fileName);
-            throw e;
         }
+        
+        List<String> missingKeys = new ArrayList<>();
+        for (String key : REQUIRED_KEYS) {
+            if (!configMap.containsKey(key) || configMap.get(key).isEmpty()) {
+                missingKeys.add(key);
+            }
+        }
+        
+        if (!missingKeys.isEmpty()) {
+            System.err.println("Error: Failed to process 'proforma_settings.sh' file.");
+            System.err.println("The following required configurations are missing or empty:");
+            for (String missingKey : missingKeys) {
+                System.err.println("- " + missingKey);
+            }
+            System.err.println("Please ensure all required configurations are defined correctly in 'proforma_settings.sh'.");
+            System.exit(1);
+        }
+        
+        this.serviceURL = configMap.get("SERVICE_URL");
+        this.lmsID = configMap.get("LMS_ID");
+        this.lmsPassword = configMap.get("LMS_PASSWORD");
+        this.graderName = configMap.get("GRADER_NAME");
+        this.graderVersion = configMap.get("GRADER_VERSION");
+        this.feedbackFormat = configMap.get("FEEDBACK_FORMAT");
+        this.feedbackStructure = configMap.get("FEEDBACK_STRUCTURE");
+        this.studentFeedbackLevel = configMap.get("STUDENT_FEEDBACK_LEVEL");
+        this.teacherFeedbackLevel = configMap.get("TEACHER_FEEDBACK_LEVEL");
     }
+
+    public String getServiceURL() { return serviceURL; }
+    public String getLmsID() { return lmsID; }
+    public String getLmsPassword() { return lmsPassword; }
+    public String getGraderName() { return graderName; }
+    public String getGraderVersion() { return graderVersion; }
+    public String getFeedbackFormat() { return feedbackFormat; }
+    public String getFeedbackStructure() { return feedbackStructure; }
+    public String getStudentFeedbackLevel() { return studentFeedbackLevel; }
+    public String getTeacherFeedbackLevel() { return teacherFeedbackLevel; }
 }
