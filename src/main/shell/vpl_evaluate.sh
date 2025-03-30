@@ -49,7 +49,7 @@ for file_path in "${file_array[@]}"; do
 done
 
 
-if [ $? -eq 0 ]; then
+if [ ! -f "/ProformaFormatter-1.0-SNAPSHOT-fat-jar-with-dependencies.jar" ]; then
     # Concatenate all file names into a single string separated by spaces
     file_list=$(printf "%s " "${file_array[@]}")
 
@@ -65,7 +65,7 @@ if [ $? -eq 0 ]; then
         
     fi
 else 
-    echo "Compilation of the ProformaFormatter.java failed. Make sure the mentioned file is included in the 'Execution files' list"
+    echo "Missing file ProformaFormatter-1.0-SNAPSHOT-fat-jar-with-dependencies.jar. Make sure the mentioned file is included in the 'Execution files' list"
 fi
 
 chmod +x vpl_execution
