@@ -48,8 +48,16 @@ for file_path in "${file_array[@]}"; do
     fi
 done
 
+# Check Java version (must be 17 or higher)
+java_version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+java_major=$(echo "$java_version" | awk -F. '{if ($1 == "1") print $2; else print $1}')
 
-if [ ! -f "/ProformaFormatter-1.0-SNAPSHOT-fat-jar-with-dependencies.jar" ]; then
+if (( java_major < 17 )); then
+    echo "Error: Java version 17 or higher is required. Found version $java_version." >&2
+    exit 1
+fi
+
+if [ -f "ProformaFormatter-1.0-SNAPSHOT-fat-jar-with-dependencies.jar" ]; then
     # Concatenate all file names into a single string separated by spaces
     file_list=$(printf "%s " "${file_array[@]}")
 
