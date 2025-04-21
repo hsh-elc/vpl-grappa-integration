@@ -26,7 +26,7 @@ import proforma.xml21.GradesNullifyBaseType;
 import org.abp.vpl_proforma.response.gradingstructure.CombineNode;
 import org.abp.vpl_proforma.response.gradingstructure.GradingNode;
 import org.abp.vpl_proforma.response.gradingstructure.TestNode;
-import org.abp.vpl_proforma.response.html.HTMLResponseGenerator;
+import org.abp.vpl_proforma.response.htmlformatter.HTMLResponseGenerator;
 import org.abp.vpl_proforma.utility.GradingHintsHelper;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class ProformaResponseFormatter {
         this.responsePojo = responsePojo;
         this.taskGradingHintsElem = taskGradingHintsElem;
         this.taskTestElem = taskTestElem;
-        this.htmlGenerator = new HTMLResponseGenerator();
+        this.htmlGenerator = new HTMLResponseGenerator(null, null, 1.0);
         this.gradingHintsHelper = new GradingHintsHelper(taskGradingHintsElem, taskTestElem);
     }
 
@@ -70,10 +70,22 @@ public class ProformaResponseFormatter {
 
         // Process nullification conditions
         processNullifyConditions(taskGradingHintsElem.getRoot(), gradingStructure);
-        updateScoreOfCombineNode(gradingStructure);
+
+        // Calculate scale factor to adjust weights in the final output.
+        double scaleFactor = 1;
+        if (!gradingHintsHelper.isEmpty()) {
+            double maxScoreGradingHints = gradingHintsHelper.calculateMaxScore();
+            if (Math.abs(maxScoreGradingHints - maxScoreLMS) > 1e-5) {
+                scaleFactor = maxScoreLMS / maxScoreGradingHints;
+            }
+        }
+        
+        // Output HTML documents
+        htmlGenerator = new HTMLResponseGenerator(separateTestFeedback, gradingStructure, scaleFactor);
+        htmlGenerator.generateSeparateTestFeedbackDocuments();
 
         // Output debugging information
-        debugPrintGradingStructure(gradingStructure, "");
+        // debugPrintGradingStructure(gradingStructure, "");
     }
 
     /**
@@ -677,18 +689,6 @@ public class ProformaResponseFormatter {
             System.out.println(indent + "  - SubRef ID: " + testNode.getSubRefId());
             System.out.println(indent + "  - Student Feedback Count: " + testNode.getStudentFeedback().size());
             System.out.println(indent + "  - Teacher Feedback Count: " + testNode.getTeacherFeedback().size());
-            
-            // if (!testNode.getStudentFeedback().isEmpty()) {
-            //     System.out.println(indent + "  - Student Feedback:");
-            //     testNode.getStudentFeedback().forEach(fb -> 
-            //         System.out.println(indent + "    * " + fb));
-            // }
-            
-            // if (!testNode.getTeacherFeedback().isEmpty()) {
-            //     System.out.println(indent + "  - Teacher Feedback:");
-            //     testNode.getTeacherFeedback().forEach(fb -> 
-            //         System.out.println(indent + "    * " + fb));
-            // }
 
         } else if (node instanceof CombineNode combineNode) {
             System.out.println(indent + "Combine Node Specific:");
