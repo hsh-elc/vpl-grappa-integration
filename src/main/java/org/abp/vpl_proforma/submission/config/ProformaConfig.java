@@ -46,13 +46,10 @@ public class ProformaConfig {
         }
         
         if (!missingKeys.isEmpty()) {
-            System.err.println("Error: Failed to process 'proforma_settings.sh' file.");
-            System.err.println("The following required configurations are missing or empty:");
-            for (String missingKey : missingKeys) {
-                System.err.println("- " + missingKey);
-            }
-            System.err.println("Please ensure all required configurations are defined correctly in 'proforma_settings.sh'.");
-            System.exit(1);
+            throw new IllegalStateException("Failed to process 'proforma_settings.sh' file. " +
+                "The following required configurations are missing or empty: " +
+                String.join(", ", missingKeys) +
+                ". Please ensure all required configurations are defined correctly in 'proforma_settings.sh'.");
         }
         
         this.serviceURL = configMap.get("SERVICE_URL");

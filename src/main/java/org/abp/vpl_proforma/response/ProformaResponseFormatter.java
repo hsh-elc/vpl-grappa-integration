@@ -230,8 +230,13 @@ public class ProformaResponseFormatter {
         }
 
         double weight = testRef.getWeight() != null ? testRef.getWeight() : 1.0;
-        double rawScore = scoresMap.getOrDefault(refId, new HashMap<>())
-                                .getOrDefault(subRefId, 0.0);
+        Map<String, Double> testScores = scoresMap.get(refId);
+        if (testScores == null || !testScores.containsKey(subRefId)) {
+            throw new IllegalStateException(
+                String.format("Missing score data for test reference: id='%s', subRef='%s'. Check grading hints and test response consistency.", refId, subRefId.isEmpty() ? "<none>" : subRefId)
+            );
+        }
+        double rawScore = testScores.get(subRefId);
         double actualScore = rawScore * weight;
 
         List<String> studentFeedback = new ArrayList<>();
@@ -508,7 +513,10 @@ public class ProformaResponseFormatter {
         }
 
         if (!(operand1Set && operand2Set)) {
-            return false;
+            throw new RuntimeException("Invalid nullify condition: " + nullifyCondition + 
+                ". Both operands must be set for comparison. Operand1 set: " + operand1Set + 
+                ", Operand2 set: " + operand2Set + 
+                ". Please check the grading hints configuration and ensure all referenced nodes exist.");
         }
 
         return compareOperands(operand1, operand2, compareOp);
@@ -530,7 +538,8 @@ public class ProformaResponseFormatter {
             case "ge" -> operand1 >= operand2;
             case "lt" -> operand1 < operand2;
             case "le" -> operand1 <= operand2;
-            default -> false;
+            // Make invalid operator an error
+            default -> throw new IllegalArgumentException("Unsupported comparison operator found in nullify condition: '" + compareOp + "'");
         };
     }
 
@@ -556,12 +565,12 @@ public class ProformaResponseFormatter {
             results.add(result);
         }
 
-        if ("and".equals(composeOp)) {
-            return results.stream().allMatch(result -> result);
-        } else if ("or".equals(composeOp)) {
-            return results.stream().anyMatch(result -> result);
-        }
-        return false;
+        return switch (composeOp) {
+            case "and" -> results.stream().allMatch(result -> result);
+            case "or" -> results.stream().anyMatch(result -> result);
+            // Make invalid operator an error
+            default -> throw new IllegalArgumentException("Unsupported composition operator found in nullify conditions: '" + composeOp + "'");
+        };
     }
 
     /**

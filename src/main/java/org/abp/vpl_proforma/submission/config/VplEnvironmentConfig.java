@@ -65,9 +65,6 @@ public class VplEnvironmentConfig {
                     this.maxScoreLMS = Double.parseDouble(maxGradeStr);
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Error opening file: " + fileName);
-            throw e;
         }
     }
 }

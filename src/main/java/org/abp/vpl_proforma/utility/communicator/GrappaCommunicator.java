@@ -75,14 +75,14 @@ public class GrappaCommunicator implements CommunicatorInterface {
                         responseCode, connection.getResponseMessage(), errorDetails));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Network error occurred while communicating with the middleware: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve response from grappa-middleware. Following error occurred: " + e.getMessage(), e);
         } finally {
             if (connection != null) {
                 connection.disconnect();
             }
         }
     }
-
+ 
     private AsyncSubmissionResponse parseAsyncResponse(String jsonResponse) {
         // Extract gradeProcessId
         int idStart = jsonResponse.indexOf("\"gradeProcessId\":\"") + 18;
@@ -134,7 +134,7 @@ public class GrappaCommunicator implements CommunicatorInterface {
                         responseCode, connection.getResponseMessage(), errorDetails));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Network error occurred while communicating with the middleware: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to enqueue submission from vpl-jail-system to grappa-middleware. Following error occurred: " + e.getMessage(), e);
         } finally {
             if (connection != null) {
                 connection.disconnect();

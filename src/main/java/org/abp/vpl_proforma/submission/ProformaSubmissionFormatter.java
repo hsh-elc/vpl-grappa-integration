@@ -134,22 +134,34 @@ public class ProformaSubmissionFormatter {
     }
 
     private void handleSubmissionFiles(SubmissionType submissionPojo, List<String> files) {
+        if (files == null) {
+            throw new IllegalArgumentException("Submission file list cannot be null.");
+        }
+
         SubmissionFilesType submissionFilesType = new SubmissionFilesType();
         for (String fileEntry : files) {
-            SubmissionFileType submissionFileType = new SubmissionFileType();
+            try {
+                SubmissionFileType submissionFileType = new SubmissionFileType();
 
-            String mimeType = Utility.determineMimeType(fileEntry);
-            submissionFileType.setMimetype(mimeType);
+                String mimeType = Utility.determineMimeType(fileEntry);
+                submissionFileType.setMimetype(mimeType);
 
-            if (mimeType.startsWith("text/")) {
-                AttachedTxtFileType attachedTxtFileType = new AttachedTxtFileType();
-                attachedTxtFileType.setEncoding("UTF-8");
-                attachedTxtFileType.setValue(fileEntry);
-                submissionFileType.setAttachedTxtFile(attachedTxtFileType);
-            } else {
-                submissionFileType.setAttachedBinFile(fileEntry);
+                if (mimeType != null && mimeType.startsWith("text/")) {
+                    AttachedTxtFileType attachedTxtFileType = new AttachedTxtFileType();
+                    attachedTxtFileType.setEncoding("UTF-8");
+                    attachedTxtFileType.setValue(fileEntry);
+                    submissionFileType.setAttachedTxtFile(attachedTxtFileType);
+                } else {
+                    submissionFileType.setAttachedBinFile(fileEntry);
+                }
+                submissionFilesType.getFile().add(submissionFileType);
+
+            } catch (Exception e) {
+                throw new RuntimeException(
+                    "Error processing submission file: '" + fileEntry + "'. Details: " + e.getMessage(), 
+                    e
+                );
             }
-            submissionFilesType.getFile().add(submissionFileType);
         }
         submissionPojo.setFiles(submissionFilesType);
     }
@@ -181,7 +193,7 @@ public class ProformaSubmissionFormatter {
     }
 
     public byte[] createSubmissionZip(SubmissionType submissionType, String taskFilename, String taskRefType,
-                                             List<String> submissionFilePaths) throws Exception {
+                                             List<String> submissionFilePaths) {
         Zip.ZipContent zipContent = new Zip.ZipContent();
 
         addSubmissionXmlToZipContent(zipContent, submissionType);
@@ -200,30 +212,37 @@ public class ProformaSubmissionFormatter {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Zip.writeMapToZipFile(zipContent, baos);
             return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Error while creating submission zip.", e);
         }
     }
 
 
-    private void addSubmissionXmlToZipContent(Zip.ZipContent zipContent, SubmissionType submissionType) throws Exception {
-        // Marshal the SubmissionType to XML in memory
-        JAXBContext jaxbContext = JAXBContext.newInstance(SubmissionType.class);
-        ByteArrayOutputStream xmlOutputStream = new ByteArrayOutputStream();
-        Marshaller marshaller = jaxbContext.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.marshal(submissionType, xmlOutputStream);
+    private void addSubmissionXmlToZipContent(Zip.ZipContent zipContent, SubmissionType submissionType) {
+        try {
+            // Marshal the SubmissionType to XML in memory
+            JAXBContext jaxbContext = JAXBContext.newInstance(SubmissionType.class);
+            ByteArrayOutputStream xmlOutputStream = new ByteArrayOutputStream();
+            Marshaller marshaller = jaxbContext.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+            marshaller.marshal(submissionType, xmlOutputStream);
 
-        // Create a ZipContentElement for submission.xml
-        byte[] xmlBytes = xmlOutputStream.toByteArray();
-        Zip.ZipContentElement element = new Zip.ZipContentElement("submission.xml", xmlBytes, System.currentTimeMillis());
+            // Create a ZipContentElement for submission.xml
+            byte[] xmlBytes = xmlOutputStream.toByteArray();
+            Zip.ZipContentElement element = new Zip.ZipContentElement("submission.xml", xmlBytes, System.currentTimeMillis());
 
-        // Add to the ZIP content
-        zipContent.put("submission.xml", element);
+            // Add to the ZIP content
+            zipContent.put("submission.xml", element);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while adding submission.xml to zip content.", e);
+        }
     }
 
-    private void addFileToZipContent(Zip.ZipContent zipContent, String entryPath, Path filePath) throws IOException {
-        if (Files.isDirectory(filePath)) {
-            // Add the directory itself
-            Zip.ZipContentElement dirElement = new Zip.ZipContentElement(entryPath + "/", null, Files.getLastModifiedTime(filePath).toMillis());
+    private void addFileToZipContent(Zip.ZipContent zipContent, String entryPath, Path filePath) {
+        try {
+            if (Files.isDirectory(filePath)) {
+                // Add the directory itself
+                Zip.ZipContentElement dirElement = new Zip.ZipContentElement(entryPath + "/", null, Files.getLastModifiedTime(filePath).toMillis());
             zipContent.put(entryPath.endsWith("/") ? entryPath : entryPath + "/", dirElement);
 
             // Recursively add contents of the directory
@@ -237,7 +256,10 @@ public class ProformaSubmissionFormatter {
             // Add a file
             byte[] fileBytes = Files.readAllBytes(filePath);
             Zip.ZipContentElement fileElement = new Zip.ZipContentElement(entryPath, fileBytes, Files.getLastModifiedTime(filePath).toMillis());
-            zipContent.put(entryPath, fileElement);
+                zipContent.put(entryPath, fileElement);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error while adding file to zip content.", e);
         }
     }
 
