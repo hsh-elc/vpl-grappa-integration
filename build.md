@@ -1,10 +1,10 @@
 # Build Guide
 
-This guide provides steps to recreate the Maven project, install necessary dependencies, and produce a fat JAR file for the project.
+This guide provides steps to recreate the Maven project, install necessary dependencies, and produce a fat JAR file named `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` for the project.
 
 ### Prerequisites
 
-- Install **JRE 17** as it is required for this project.
+- Install **JDK 17** as it is required for this project.
 - Ensure the following files are available and stored in a directory named **lib** in the project root:
   - grappa-webservice-parent.xml
   - proformautil-0.2.1.jar
@@ -57,4 +57,4 @@ To build the fat JAR, use the following command:
 mvn clean package
 ```
 
-This command cleans any previous builds and packages the project into a single JAR file that includes all dependencies.
+This command cleans any previous builds and packages the project into a single JAR file that includes all dependencies. The resulting file can be found in the `target` subfolder.

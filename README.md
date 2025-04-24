@@ -6,13 +6,13 @@ This README provides an overview of the ProFormA integration with the Virtual Pr
 
 ## Guide Summaries
 
-### 2. `build.md`
-The `build.md` file details the process of building the ProformaFormatter-<version>-fat-jar-with-dependencies.jar file, which acts as a bridge between Grappa and the VPL plugin. It covers:
+### 1. `build.md`
+The `build.md` file details the process of building the `ProformaFormatter-<version>-fat-jar-with-dependencies.jar` file, which acts as a bridge between Grappa and the VPL plugin. It covers:
 - The prerequisites needed for the development environment, including required Java runtime and library files.
 - Steps to install dependencies locally using Maven.
 - Instructions for generating a fat JAR file that packages all necessary dependencies for deployment.
 
-### 1. `install.md`
+### 2. `install.md`
 The `install.md` file provides the installation instructions for setting up the VPL plugin and the Jail-System on Moodle. It includes:
 - Overview of the steps to install the VPL plugin in Moodle.
 - Overview of the steps required for setting up the Jail-Server as a secure environment for executing code.
