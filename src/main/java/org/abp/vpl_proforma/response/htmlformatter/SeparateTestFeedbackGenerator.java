@@ -28,6 +28,8 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
     private static final String CSS_INNER_COLLAPSIBLE = "inner-collapsible";
     private static final String CSS_BOLD = "bold";
     private static final String CSS_CONTENT = "content";
+    private static final String CSS_EXPAND_COLLAPSE_BUTTONS = "expand-collapse-buttons";
+    private static final String CSS_EXPAND_COLLAPSE_BUTTON = "expand-collapse-button";
 
     private static final String HTML_BUTTON = "button";
     private static final String HTML_DIV = "div";
@@ -257,7 +259,6 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
             resultText.append(NULLIFIED_SUFFIX);
         }
         sb.append("    <" + HTML_SPAN + " class=\"" + CSS_TITLE_RESULT + "\">" + resultText.toString() + "</" + HTML_SPAN + ">\n");
-
         sb.append("    <" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + " " + CSS_INNER_COLLAPSIBLE + "\">" + DETAILS_FEEDBACK_BUTTON_TEXT + "</" + HTML_BUTTON + ">\n");
         sb.append("  </" + HTML_DIV + ">\n"); // Close title-container div
     }
@@ -319,6 +320,14 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
           .append("</" + HTML_BUTTON + ">\n");
         // Content div is opened here, closed after content is added
         sb.append("<" + HTML_DIV + " class=\"content\">\n");
+        
+        // Add expand/collapse buttons for detailed feedback section
+        if (title.equals(FEEDBACK_TITLE_DETAILED)) {
+            sb.append("  <" + HTML_DIV + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTONS + "\">\n")
+              .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"expand-all\">Expand All</" + HTML_BUTTON + ">\n")
+              .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"collapse-all\">Collapse All</" + HTML_BUTTON + ">\n")
+              .append("  </" + HTML_DIV + ">\n");
+        }
     }
 
     private void addStudentFeedbackList(StringBuilder sb, SeparateTestFeedbackType separateTestFeedback) {
@@ -376,6 +385,9 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
             .inner-content { padding: 5px 10px; border-top: 1px dashed #ccc; margin-left: 10px; background-color: inherit; }
             body { max-width: 1300px; margin: 20px auto; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); padding: 10px; }
             .nullify-reason { color: red; font-style: italic; font-weight: bold; margin-top: 10px; }
+            .expand-collapse-buttons { display: flex; gap: 10px; margin: 10px 0; padding: 10px; justify-content: flex-end; }
+            .expand-collapse-button { padding: 5px 10px; background-color:navy; color: white; border: none; border-radius: 4px; cursor: pointer; }
+            .expand-collapse-button:hover { background-color: rgb(65, 105, 225); } /* RoyalBlue - lighter than navy */
             """;
     }
     
@@ -422,6 +434,41 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
                     currentContent.style.maxHeight = currentContent.scrollHeight + 'px';
                     // Optional: After animation, set to 'none' to allow dynamic content resizing
                     setTimeout(() => { if (currentContent && currentContent.style.maxHeight !== '0px') currentContent.style.maxHeight = 'none'; }, 200); // Match transition duration
+                  }
+                });
+              }
+              
+              // Add event listeners for Expand All and Collapse All buttons
+              var expandAllBtn = document.getElementById('expand-all');
+              var collapseAllBtn = document.getElementById('collapse-all');
+              
+              if (expandAllBtn) {
+                expandAllBtn.addEventListener('click', function() {
+                  var innerCollapsibles = document.getElementsByClassName('inner-collapsible');
+                  for (var i = 0; i < innerCollapsibles.length; i++) {
+                    var button = innerCollapsibles[i];
+                    var content = button.parentElement.nextElementSibling;
+                    
+                    if (content && content.style.maxHeight === '0px') {
+                      button.classList.add('active');
+                      content.style.maxHeight = content.scrollHeight + 'px';
+                      setTimeout(() => { if (content && content.style.maxHeight !== '0px') content.style.maxHeight = 'none'; }, 200);
+                    }
+                  }
+                });
+              }
+              
+              if (collapseAllBtn) {
+                collapseAllBtn.addEventListener('click', function() {
+                  var innerCollapsibles = document.getElementsByClassName('inner-collapsible');
+                  for (var i = 0; i < innerCollapsibles.length; i++) {
+                    var button = innerCollapsibles[i];
+                    var content = button.parentElement.nextElementSibling;
+                    
+                    if (content && content.style.maxHeight !== '0px') {
+                      button.classList.remove('active');
+                      content.style.maxHeight = '0px';
+                    }
                   }
                 });
               }
