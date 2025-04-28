@@ -5,6 +5,9 @@
 export SERVICE_URL="http://grappadev.inform.hs-hannover.de:8080/grappa-webservice-2/rest/"
 export LMS_ID="test"
 export LMS_PASSWORD="test"
+# Accept self signed certificates of the middleware server
+# Accepted values: YES, NO
+export ACCEPT_SELF_SIGNED_CERTS="YES"
 
 # Grader settings
 # Name of the grader - options include Graja, aSQLg, GraFlap, etc.

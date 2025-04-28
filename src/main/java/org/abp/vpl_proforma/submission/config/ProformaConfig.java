@@ -7,6 +7,7 @@ public class ProformaConfig {
     private String serviceURL;
     private String lmsID;
     private String lmsPassword;
+    private String acceptSelfSignedCerts;
     private String graderName;
     private String graderVersion;
     private String feedbackFormat;
@@ -15,7 +16,7 @@ public class ProformaConfig {
     private String teacherFeedbackLevel;
 
     private static final List<String> REQUIRED_KEYS = Arrays.asList(
-        "SERVICE_URL", "LMS_ID", "LMS_PASSWORD", "GRADER_NAME", "GRADER_VERSION", 
+        "SERVICE_URL", "LMS_ID", "LMS_PASSWORD", "ACCEPT_SELF_SIGNED_CERTS", "GRADER_NAME", "GRADER_VERSION", 
         "FEEDBACK_FORMAT", "FEEDBACK_STRUCTURE", "STUDENT_FEEDBACK_LEVEL", "TEACHER_FEEDBACK_LEVEL"
     );
     
@@ -55,6 +56,7 @@ public class ProformaConfig {
         this.serviceURL = configMap.get("SERVICE_URL");
         this.lmsID = configMap.get("LMS_ID");
         this.lmsPassword = configMap.get("LMS_PASSWORD");
+        this.acceptSelfSignedCerts = configMap.get("ACCEPT_SELF_SIGNED_CERTS");
         this.graderName = configMap.get("GRADER_NAME");
         this.graderVersion = configMap.get("GRADER_VERSION");
         this.feedbackFormat = configMap.get("FEEDBACK_FORMAT");
@@ -66,6 +68,7 @@ public class ProformaConfig {
     public String getServiceURL() { return serviceURL; }
     public String getLmsID() { return lmsID; }
     public String getLmsPassword() { return lmsPassword; }
+    public String getAcceptSelfSignedCerts() { return acceptSelfSignedCerts; }
     public String getGraderName() { return graderName; }
     public String getGraderVersion() { return graderVersion; }
     public String getFeedbackFormat() { return feedbackFormat; }

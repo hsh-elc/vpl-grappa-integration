@@ -22,25 +22,24 @@ public class GrappaCommunicator implements CommunicatorInterface {
     private final String lmsID;
     private final String lmsPassword;
 
-    public GrappaCommunicator(String serviceURL, String lmsID, String lmsPassword) {
+    public GrappaCommunicator(String serviceURL, String lmsID, String lmsPassword, boolean acceptSelfSignedCerts) {
         this.serviceURL = serviceURL;
         this.lmsID = lmsID;
         this.lmsPassword = lmsPassword;
+        
+        if (acceptSelfSignedCerts) {
+            configureSSLForSelfSignedCerts();
+        }
     }
 
     /**
-     * For testing purposes
-     * Source: https://stackoverflow.com/a/5297100
+     * Configures SSL to accept self-signed certificates.
+     * This should only be used in development/testing environments.
      */
-    private static void trustEveryone() {
+    private void configureSSLForSelfSignedCerts() {
         try {
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new X509TrustManager[] { new X509TrustManager() {
+            // Create a trust manager that accepts all certificates
+            X509TrustManager trustManager = new X509TrustManager() {
                 public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
                 }
 
@@ -50,16 +49,27 @@ public class GrappaCommunicator implements CommunicatorInterface {
                 public X509Certificate[] getAcceptedIssuers() {
                     return new X509Certificate[0];
                 }
-            } }, new SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
-        } catch (Exception e) { // should never happen
-            e.printStackTrace();
-        }
-    }
+            };
 
-    static {
-        // This should not be used in production mode!
-        trustEveryone();
+            // Create a hostname verifier that accepts all hostnames
+            HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            };
+
+            // Configure SSL context
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, new X509TrustManager[] { trustManager }, new SecureRandom());
+            
+            // Set the default SSL socket factory and hostname verifier
+            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+            
+            System.out.println("Warning: SSL certificate validation has been disabled. This should only be used in development/testing environments.");
+        } catch (Exception e) {
+            throw new RuntimeException("Error configuring SSL for self-signed certificates: " + e.getMessage(), e);
+        }
     }
     
     /**

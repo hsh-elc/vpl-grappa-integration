@@ -66,11 +66,13 @@ public class Main {
                 System.err.println("2. Make sure the file is marked as non-removable under the 'File to keep when running' tab.");
                 throw e;
             } 
+            
+            Boolean acceptSelfSignedCerts = config.getAcceptSelfSignedCerts().toUpperCase().equals("YES");
 
             // Start building submission 
             ProformaSubmissionFormatter proformaSubmissionFormatter = new ProformaSubmissionFormatter();
             CommunicatorInterface communicator = CommunicatorFactory.getCommunicator(
-                    "grappa", config.getServiceURL(), config.getLmsID(), config.getLmsPassword());
+                    "grappa", config.getServiceURL(), config.getLmsID(), config.getLmsPassword(), acceptSelfSignedCerts);
 
             TaskType taskPojo = proformaSubmissionFormatter.getTaskType(taskFilename);
             TestsType tests = taskPojo.getTests();
@@ -108,14 +110,13 @@ public class Main {
             ProformaResponseFormatter proformaResponseFormatter = new ProformaResponseFormatter(responsePojo, gradingHints, tests);
             proformaResponseFormatter.processResult(maxScoreLMS);
         } catch (Exception e) {
-            outputStudentError(e.getMessage());
+            outputStudentError();
             outputTeacherError(e.getMessage(), e.getStackTrace());
             System.exit(1);
         }
     }
 
-    private static void outputStudentError(String message) {
-        // Logic to display error specifically for students (e.g., simplified message)
+    private static void outputStudentError() {
         System.err.println("\n--- Student Error ---");
         System.err.println("<|--");
         System.err.println("An error occurred while submitting your assignment. Please contact your teacher for assistance.");
