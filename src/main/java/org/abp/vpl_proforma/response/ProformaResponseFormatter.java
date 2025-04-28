@@ -26,7 +26,8 @@ import proforma.xml21.GradesNullifyBaseType;
 import org.abp.vpl_proforma.response.gradingstructure.CombineNode;
 import org.abp.vpl_proforma.response.gradingstructure.GradingNode;
 import org.abp.vpl_proforma.response.gradingstructure.TestNode;
-import org.abp.vpl_proforma.response.htmlformatter.HTMLResponseGenerator;
+import org.abp.vpl_proforma.response.htmlformatter.MergedTestFeedbackGenerator;
+import org.abp.vpl_proforma.response.htmlformatter.SeparateTestFeedbackGenerator;
 import org.abp.vpl_proforma.utility.GradingHintsHelper;
 
 import java.util.ArrayList;
@@ -39,13 +40,13 @@ public class ProformaResponseFormatter {
     private ResponseType responsePojo;
     private GradingHintsType taskGradingHintsElem;
     private TestsType taskTestElem;
-    private HTMLResponseGenerator htmlGenerator;
     private GradingHintsHelper gradingHintsHelper;
+    private boolean hasInternalError = false;
+
     public ProformaResponseFormatter(ResponseType responsePojo, GradingHintsType taskGradingHintsElem, TestsType taskTestElem) {
         this.responsePojo = responsePojo;
         this.taskGradingHintsElem = taskGradingHintsElem;
         this.taskTestElem = taskTestElem;
-        this.htmlGenerator = new HTMLResponseGenerator(null, null, 1.0);
         this.gradingHintsHelper = new GradingHintsHelper(taskGradingHintsElem, taskTestElem);
     }
 
@@ -55,7 +56,8 @@ public class ProformaResponseFormatter {
             String studentFeedback = this.responsePojo.getMergedTestFeedback().getStudentFeedback();
             String teacherFeedback = this.responsePojo.getMergedTestFeedback().getTeacherFeedback();
             
-            htmlGenerator.outputMergedTestFeedback(studentFeedback, teacherFeedback, grade);
+            MergedTestFeedbackGenerator htmlGenerator = new MergedTestFeedbackGenerator(studentFeedback, teacherFeedback, grade);
+            htmlGenerator.generateReport();
         } else {
             SeparateTestFeedbackType separateTestFeedback = this.responsePojo.getSeparateTestFeedback();
             createSeparateTestFeedbackResponseHTML(separateTestFeedback, maxScoreLMS);
@@ -81,8 +83,8 @@ public class ProformaResponseFormatter {
         }
         
         // Output HTML documents
-        htmlGenerator = new HTMLResponseGenerator(separateTestFeedback, gradingStructure, scaleFactor);
-        htmlGenerator.generateSeparateTestFeedbackDocuments();
+        SeparateTestFeedbackGenerator htmlGenerator = new SeparateTestFeedbackGenerator(separateTestFeedback, gradingStructure, scaleFactor, hasInternalError);
+        htmlGenerator.generateReport();
 
         // Output debugging information
         // debugPrintGradingStructure(gradingStructure, "");
@@ -118,7 +120,7 @@ public class ProformaResponseFormatter {
                     ResultType testResult = result.getResult();
                     if (testResult != null) {
                         if (testResult.isIsInternalError()) {
-                            throw new RuntimeException("One of the test results returned is invalid (Internal Error).");
+                            hasInternalError = true;
                         }
                         scoresMap.get(testId).put("", testResult.getScore().doubleValue());
                     }
