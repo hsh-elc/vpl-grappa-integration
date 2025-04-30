@@ -133,6 +133,8 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
         addHeadSection(sb);
         addBodySection(sb);
 
+        addExpandCollapseAllButtons(sb);
+        
         // Add Summarized Feedback Section
         addCollapsibleFeedbackSection(sb, FEEDBACK_TITLE_SUMMARIZED);
         addStudentFeedbackList(sb, separateTestFeedback);
@@ -320,14 +322,13 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
           .append("</" + HTML_BUTTON + ">\n");
         // Content div is opened here, closed after content is added
         sb.append("<" + HTML_DIV + " class=\"content\">\n");
-        
-        // Add expand/collapse buttons for detailed feedback section
-        if (title.equals(FEEDBACK_TITLE_DETAILED)) {
-            sb.append("  <" + HTML_DIV + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTONS + "\">\n")
-              .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"expand-all\">Expand All</" + HTML_BUTTON + ">\n")
-              .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"collapse-all\">Collapse All</" + HTML_BUTTON + ">\n")
-              .append("  </" + HTML_DIV + ">\n");
-        }
+    }
+    
+    private void addExpandCollapseAllButtons(StringBuilder sb) {
+        sb.append("  <" + HTML_DIV + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTONS + "\">\n")
+        .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"expand-all\">Expand All</" + HTML_BUTTON + ">\n")
+        .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"collapse-all\">Collapse All</" + HTML_BUTTON + ">\n")
+        .append("  </" + HTML_DIV + ">\n");
     }
 
     private void addStudentFeedbackList(StringBuilder sb, SeparateTestFeedbackType separateTestFeedback) {
@@ -444,32 +445,39 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
               
               if (expandAllBtn) {
                 expandAllBtn.addEventListener('click', function() {
-                  var innerCollapsibles = document.getElementsByClassName('inner-collapsible');
-                  for (var i = 0; i < innerCollapsibles.length; i++) {
-                    var button = innerCollapsibles[i];
-                    var content = button.parentElement.nextElementSibling;
-                    
+                  var collapsibles = document.getElementsByClassName('collapsible');
+                  for (var i = 0; i < collapsibles.length; i++) {
+                    var button = collapsibles[i];
+                    var content;
+                    if (button.classList.contains('inner-collapsible')) {
+                      content = button.parentElement.nextElementSibling;
+                    } else {
+                      content = button.nextElementSibling;
+                    }
                     if (content && content.style.maxHeight === '0px') {
-                      button.classList.add('active');
-                      content.style.maxHeight = content.scrollHeight + 'px';
-                      setTimeout(() => { if (content && content.style.maxHeight !== '0px') content.style.maxHeight = 'none'; }, 200);
+                      button.click();
                     }
                   }
+                  
                 });
               }
               
               if (collapseAllBtn) {
                 collapseAllBtn.addEventListener('click', function() {
-                  var innerCollapsibles = document.getElementsByClassName('inner-collapsible');
-                  for (var i = 0; i < innerCollapsibles.length; i++) {
-                    var button = innerCollapsibles[i];
-                    var content = button.parentElement.nextElementSibling;
-                    
+                  var collapsibles = document.getElementsByClassName('collapsible');
+                  for (var i = 0; i < collapsibles.length; i++) {
+                    var button = collapsibles[i];
+                    var content;
+                    if (button.classList.contains('inner-collapsible')) {
+                      content = button.parentElement.nextElementSibling;
+                    } else {
+                      content = button.nextElementSibling;
+                    }
                     if (content && content.style.maxHeight !== '0px') {
-                      button.classList.remove('active');
-                      content.style.maxHeight = '0px';
+                      button.click();
                     }
                   }
+                  
                 });
               }
             });

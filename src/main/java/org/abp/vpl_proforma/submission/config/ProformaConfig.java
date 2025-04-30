@@ -7,7 +7,7 @@ public class ProformaConfig {
     private String serviceURL;
     private String lmsID;
     private String lmsPassword;
-    private String acceptSelfSignedCerts;
+    private boolean acceptSelfSignedCerts;
     private String graderName;
     private String graderVersion;
     private String feedbackFormat;
@@ -16,9 +16,18 @@ public class ProformaConfig {
     private String teacherFeedbackLevel;
 
     private static final List<String> REQUIRED_KEYS = Arrays.asList(
-        "SERVICE_URL", "LMS_ID", "LMS_PASSWORD", "ACCEPT_SELF_SIGNED_CERTS", "GRADER_NAME", "GRADER_VERSION", 
-        "FEEDBACK_FORMAT", "FEEDBACK_STRUCTURE", "STUDENT_FEEDBACK_LEVEL", "TEACHER_FEEDBACK_LEVEL"
-    );
+            "SERVICE_URL", "LMS_ID", "LMS_PASSWORD", "GRADER_NAME", "GRADER_VERSION"
+        );
+        
+    private static final Map<String, String> OPTIONAL_KEYS = new HashMap<>();
+    static {
+        // Default values
+        OPTIONAL_KEYS.put("ACCEPT_SELF_SIGNED_CERTS", "no");
+        OPTIONAL_KEYS.put("FEEDBACK_FORMAT", "zip");
+        OPTIONAL_KEYS.put("FEEDBACK_STRUCTURE", "separate-test-feedback");
+        OPTIONAL_KEYS.put("STUDENT_FEEDBACK_LEVEL", "info");
+        OPTIONAL_KEYS.put("TEACHER_FEEDBACK_LEVEL", "info");
+    }
     
     public ProformaConfig(String fileName) throws IOException {
         loadConfigFromFile(fileName);
@@ -52,23 +61,42 @@ public class ProformaConfig {
                 String.join(", ", missingKeys) +
                 ". Please ensure all required configurations are defined correctly in 'proforma_settings.sh'.");
         }
+
+        for (String key : OPTIONAL_KEYS.keySet()) {
+            if (!configMap.containsKey(key) || configMap.get(key).isEmpty()) {
+                configMap.put(key, OPTIONAL_KEYS.get(key));
+            }
+        }
+
+        this.serviceURL = configMap.get("SERVICE_URL").trim();
+        // chop trailing slashes, if any:
+        while (this.serviceURL.endsWith("/") || this.serviceURL.endsWith("\\")) {
+            this.serviceURL = this.serviceURL.substring(0, this.serviceURL.length()-1);
+        }
+
+        this.lmsID = configMap.get("LMS_ID").trim();
         
-        this.serviceURL = configMap.get("SERVICE_URL");
-        this.lmsID = configMap.get("LMS_ID");
-        this.lmsPassword = configMap.get("LMS_PASSWORD");
-        this.acceptSelfSignedCerts = configMap.get("ACCEPT_SELF_SIGNED_CERTS");
-        this.graderName = configMap.get("GRADER_NAME");
-        this.graderVersion = configMap.get("GRADER_VERSION");
-        this.feedbackFormat = configMap.get("FEEDBACK_FORMAT");
-        this.feedbackStructure = configMap.get("FEEDBACK_STRUCTURE");
-        this.studentFeedbackLevel = configMap.get("STUDENT_FEEDBACK_LEVEL");
-        this.teacherFeedbackLevel = configMap.get("TEACHER_FEEDBACK_LEVEL");
+        this.lmsPassword = configMap.get("LMS_PASSWORD").trim();
+        
+        String a = configMap.get("ACCEPT_SELF_SIGNED_CERTS").trim().toUpperCase();
+        boolean yes = a.equals("YES") || a.equals("TRUE") || a.equals("ON"); 
+        boolean no = a.equals("NO") || a.equals("FALSE") || a.equals("OFF"); 
+        if (!yes && !no) 
+            throw new IllegalStateException("Failed to process 'proforma_settings.sh' file. Illegal value '" + configMap.get("ACCEPT_SELF_SIGNED_CERTS") + "' for ACCEPT_SELF_SIGNED_CERTS");
+        this.acceptSelfSignedCerts = yes;
+        
+        this.graderName = configMap.get("GRADER_NAME").trim();
+        this.graderVersion = configMap.get("GRADER_VERSION").trim();
+        this.feedbackFormat = configMap.get("FEEDBACK_FORMAT").trim();
+        this.feedbackStructure = configMap.get("FEEDBACK_STRUCTURE").trim();
+        this.studentFeedbackLevel = configMap.get("STUDENT_FEEDBACK_LEVEL").trim();
+        this.teacherFeedbackLevel = configMap.get("TEACHER_FEEDBACK_LEVEL").trim();
     }
 
     public String getServiceURL() { return serviceURL; }
     public String getLmsID() { return lmsID; }
     public String getLmsPassword() { return lmsPassword; }
-    public String getAcceptSelfSignedCerts() { return acceptSelfSignedCerts; }
+    public boolean getAcceptSelfSignedCerts() { return acceptSelfSignedCerts; }
     public String getGraderName() { return graderName; }
     public String getGraderVersion() { return graderVersion; }
     public String getFeedbackFormat() { return feedbackFormat; }

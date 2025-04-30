@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.abp.vpl_proforma.response.ProformaResponseFormatter;
 import org.abp.vpl_proforma.submission.ProformaSubmissionFormatter;
@@ -67,12 +68,10 @@ public class Main {
                 throw e;
             } 
             
-            Boolean acceptSelfSignedCerts = config.getAcceptSelfSignedCerts().toUpperCase().equals("YES");
-
             // Start building submission 
             ProformaSubmissionFormatter proformaSubmissionFormatter = new ProformaSubmissionFormatter();
             CommunicatorInterface communicator = CommunicatorFactory.getCommunicator(
-                    "grappa", config.getServiceURL(), config.getLmsID(), config.getLmsPassword(), acceptSelfSignedCerts);
+                    "grappa", config.getServiceURL(), config.getLmsID(), config.getLmsPassword(), config.getAcceptSelfSignedCerts());
 
             TaskType taskPojo = proformaSubmissionFormatter.getTaskType(taskFilename);
             TestsType tests = taskPojo.getTests();
@@ -129,7 +128,8 @@ public class Main {
         System.err.println("\n--- Teacher Error ---");
         System.err.println("Failed to process the submission.");
         System.err.println(message);
-        System.err.println("Stack Trace: " + Arrays.toString(stackTrace));
+        System.err.println("Stack Trace:\n" + 
+                Arrays.stream(stackTrace).map(se -> "  " + se.toString()).collect(Collectors.joining("\n")));
         System.err.println("---------------------\n");
     }
 }

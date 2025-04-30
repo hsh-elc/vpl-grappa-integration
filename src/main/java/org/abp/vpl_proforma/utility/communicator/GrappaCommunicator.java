@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.Formatter;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -154,7 +155,10 @@ public class GrappaCommunicator implements CommunicatorInterface {
         String urlString = serviceURL + "/" + lmsID + "/gradeprocesses?graderName=" + graderName + "&graderVersion=" + graderVersion + "&async=false";
         HttpURLConnection connection = null;
 
+        StringBuilder sb = new StringBuilder();
+        Formatter log = new Formatter(sb);
         try {
+            log.format("Trying URL %s%n", urlString);
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
 
@@ -181,14 +185,19 @@ public class GrappaCommunicator implements CommunicatorInterface {
                     throw new RuntimeException("Unexpected Content-Type: " + contentType);
                 }
             } else {
+                log.flush();
                 InputStream errorStream = connection.getErrorStream();
                 String errorDetails = errorStream != null ? new String(errorStream.readAllBytes(), StandardCharsets.UTF_8) : "No error details provided";
-                throw new RuntimeException(String.format("Failed to enqueue synchronous submission. HTTP %d: %s. Error Details: %s",
-                        responseCode, connection.getResponseMessage(), errorDetails));
+                throw new RuntimeException(String.format("Failed to enqueue synchronous submission.%nHTTP %d: %s.%nError Details: %s%nLog:%n%s%n",
+                        responseCode, connection.getResponseMessage(), errorDetails, sb));
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to enqueue submission from vpl-jail-system to grappa-middleware. Following error occurred: " + e.getMessage(), e);
+            log.flush();
+            throw new RuntimeException(
+                    String.format("Failed to enqueue submission from vpl-jail-system to grappa-middleware. %nFollowing error occurred: %s%nLog: %s%n", e.getMessage(), sb),
+                    e);
         } finally {
+            log.close();
             if (connection != null) {
                 connection.disconnect();
             }
