@@ -16,6 +16,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.nio.file.*;
@@ -32,6 +33,8 @@ public class ProformaSubmissionFormatter {
     public static final String PROFORMA_FEEDBACK_LEVEL_INFO = "info";
     public static final String PROFORMA_FEEDBACK_LEVEL_DEBUG = "debug";
     public static final String PROFORMA_FEEDBACK_LEVEL_NOTSPECIFIED = "notspecified";
+
+    private static final String[] ATTACHED_TXT_MIME_TYPES = {"application/xml", "application/sql"};
 
     public TaskType getTaskType(String taskFilename) {
         String filePath = "task/" + taskFilename;
@@ -143,10 +146,10 @@ public class ProformaSubmissionFormatter {
             try {
                 SubmissionFileType submissionFileType = new SubmissionFileType();
 
-                String mimeType = Utility.determineMimeType(fileEntry);
+                String mimeType = Utility.determineMimeType("submission/" + fileEntry); // "submission" needed for accessing file content
                 submissionFileType.setMimetype(mimeType);
 
-                if (mimeType != null && mimeType.startsWith("text/")) {
+                if (mimeType != null && isTxtMimeType(mimeType)) {
                     AttachedTxtFileType attachedTxtFileType = new AttachedTxtFileType();
                     attachedTxtFileType.setEncoding("UTF-8");
                     attachedTxtFileType.setValue(fileEntry);
@@ -190,6 +193,16 @@ public class ProformaSubmissionFormatter {
         resultSpec.setStudentFeedbackLevel(FeedbackLevelType.fromValue(studentFeedbackLevel));
         resultSpec.setTeacherFeedbackLevel(FeedbackLevelType.fromValue(teacherFeedbackLevel));
         submissionPojo.setResultSpec(resultSpec);
+    }
+
+    /**
+     * Checks if given MIME Type is eligible for producing AttachedTxtFileType
+     * 
+     * @param mimeType MIME Type to check
+     * @return true if MIME Type starts with "text/" or is in ATTACHED_TXT_MIME_TYPES
+     */
+    private boolean isTxtMimeType(String mimeType) {
+        return mimeType.startsWith("text/") || Arrays.asList(ATTACHED_TXT_MIME_TYPES).contains(mimeType);
     }
 
     public byte[] createSubmissionZip(SubmissionType submissionType, String taskFilename, String taskRefType,
