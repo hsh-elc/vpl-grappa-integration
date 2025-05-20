@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.tika.Tika;
+
 public class Utility {
 
     /**
@@ -27,9 +29,22 @@ public class Utility {
         return Files.readAllBytes(path);
     }
 
+    /**
+     * Determines the MIME Type of a file provided by filePath.
+     * Uses java.nio.file.Files.probeContentType and Apache Tika for MIME Type determination
+     * 
+     * @param filePath file path of file to be checked
+     * @return MIME Type of given file as String
+     */
     public static String determineMimeType(String filePath) {
         try {
-            return Files.probeContentType(Paths.get(filePath));
+            Path path = Paths.get(filePath);
+            String mimeType = Files.probeContentType(path);
+            if (mimeType == null) {
+                Tika tika = new Tika();
+                mimeType = tika.detect(path);
+            }
+            return mimeType;
         } catch (Exception e) {
             return "application/octet-stream";
         }
