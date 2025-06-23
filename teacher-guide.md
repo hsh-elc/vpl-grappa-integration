@@ -23,7 +23,7 @@ This guide provides step-by-step instructions for using the ProFormA integration
 
 3. **Optional Configuration**:
 
-   - Set a "Based on" activity for this activity. See the [Based-On Feature](#3-using-the-based-on-feature-to-simplify-activity-setup) section for details.
+   - Set a "Based on" activity for this activity. See the [Based-On Feature](#c-using-the-based-on-feature-to-simplify-activity-setup) section for details.
    - Enable "Evaluate just on submission" and "Automatic grade". Refer to the [Execution Options Configuration](https://vpl.dis.ulpgc.es/documentation/vpl-3.4.3+/basicfeatures.html#selecting-programming-language-tools) for more information.
    - Under "More/Maximum execution resources limits", configure the resource limits per student submissions if needed.
 
@@ -108,7 +108,7 @@ When working with ZIP files in VPL, keep the following in mind:
 
 ### C. Using the Based-On Feature to Simplify Activity Setup
 
-The "Based-On" feature in VPL allows you to create a generic "Base Activity" that serves as a template for other VPL activities, streamlining setup. A detailed example is described in the section [Based-On Example](#example-2-using-a-based-on-base-activity-for-new-activities).
+The "Based-On" feature in VPL allows you to create a generic "Base Activity" that serves as a template for other VPL activities, streamlining setup. A detailed example is described in the section [Based-On Example](#example-e2-using-a-based-on-base-activity-for-new-activities).
 
 1. **Create a Base Activity**:
 
