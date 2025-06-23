@@ -1,5 +1,6 @@
 package org.abp.vpl_proforma.response;
 
+import proforma.xml21.FeedbackType;
 import proforma.xml21.GradesBaseRefChildType;
 import proforma.xml21.GradesCombineRefChildType;
 import proforma.xml21.GradesNodeType;
@@ -348,14 +349,18 @@ public class ProformaResponseFormatter {
         }
 
         // Process student feedback
-        testResult.getFeedbackList().getStudentFeedback().stream()
-                .map(feedback -> feedback.getContent().getValue())
-                .forEach(studentFeedback::add);
+        for (FeedbackType fb : testResult.getFeedbackList().getStudentFeedback()) {
+            if (fb.getContent() != null && fb.getContent().getValue() != null) {
+                studentFeedback.add(fb.getContent().getValue());
+            }
+        }
 
         // Process teacher feedback
-        testResult.getFeedbackList().getTeacherFeedback().stream()
-                .map(feedback -> feedback.getContent().getValue())
-                .forEach(teacherFeedback::add);
+        for (FeedbackType fb : testResult.getFeedbackList().getTeacherFeedback()) {
+            if (fb.getContent() != null && fb.getContent().getValue() != null) {
+                teacherFeedback.add(fb.getContent().getValue());
+            }
+        }
     }
 
     /**
