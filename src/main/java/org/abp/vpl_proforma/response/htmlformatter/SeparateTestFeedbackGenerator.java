@@ -2,8 +2,14 @@ package org.abp.vpl_proforma.response.htmlformatter;
 
 import org.abp.vpl_proforma.response.gradingstructure.CombineNode;
 import org.abp.vpl_proforma.response.gradingstructure.TestNode;
+
 import proforma.xml21.FeedbackType;
 import proforma.xml21.SeparateTestFeedbackType;
+import proforma.xml21.EmbeddedTxtFileType;
+import proforma.xml21.ResponseFilesType;
+import proforma.xml21.ResponseFileType;
+import proforma.xml21.FilerefType;
+
 import java.util.Base64;
 import java.util.List;
 
@@ -59,9 +65,12 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
     // --- End Constants ---
 
     private final SeparateTestFeedbackType separateTestFeedback;
+    private final ResponseFilesType responseFiles;
     private final CombineNode gradingStructure;
     private final double scaleFactor;
     private final boolean hasInternalError;
+
+    private StringBuilder sb;
 
     /**
      * Constructor for SeparateTestFeedbackGenerator.
@@ -72,13 +81,17 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
      */
     public SeparateTestFeedbackGenerator(
             SeparateTestFeedbackType separateTestFeedback,
+            ResponseFilesType responseFiles,
             CombineNode gradingStructure,
             double scaleFactor,
             boolean hasInternalError) {
         this.separateTestFeedback = separateTestFeedback;
+        this.responseFiles = responseFiles;
         this.gradingStructure = gradingStructure;
         this.scaleFactor = scaleFactor;
         this.hasInternalError = hasInternalError;
+
+        this.sb = new StringBuilder();
     }
 
     @Override
@@ -127,130 +140,130 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
      * @return The complete HTML document as a String.
      */
     private String buildReportHtml(boolean includeTeacherFeedback) {
-        StringBuilder sb = new StringBuilder();
+        this.sb = new StringBuilder();
 
-        initializeHtmlDocument(sb);
-        addHeadSection(sb);
-        addBodySection(sb);
+        initializeHtmlDocument();
+        addHeadSection();
+        addBodySection();
 
-        addExpandCollapseAllButtons(sb);
+        addExpandCollapseAllButtons();
         
         // Add Summarized Feedback Section
-        addCollapsibleFeedbackSection(sb, FEEDBACK_TITLE_SUMMARIZED);
-        addStudentFeedbackList(sb, separateTestFeedback);
+        addCollapsibleFeedbackSection(FEEDBACK_TITLE_SUMMARIZED);
+        addStudentFeedbackList(separateTestFeedback);
         if (includeTeacherFeedback) {
-            addTeacherFeedbackList(sb, separateTestFeedback);
+            addTeacherFeedbackList(separateTestFeedback);
         }
-        sb.append("</div>\n"); // Close summarized content div
+        this.sb.append("</div>\n"); // Close summarized content div
 
         // Add Detailed Feedback Section
-        addCollapsibleFeedbackSection(sb, FEEDBACK_TITLE_DETAILED);
-        processGradingNodeRecursive(gradingStructure, scaleFactor, sb, includeTeacherFeedback); // Start recursive processing
-        sb.append("</div>\n"); // Close detailed content div
+        addCollapsibleFeedbackSection(FEEDBACK_TITLE_DETAILED);
+        processGradingNodeRecursive(gradingStructure, scaleFactor, includeTeacherFeedback); // Start recursive processing
+        this.sb.append("</div>\n"); // Close detailed content div
 
-        finalizeHtmlDocument(sb);
-        return sb.toString();
+        finalizeHtmlDocument();
+        return this.sb.toString();
     }
 
     /**
      * Recursive method to process a CombineNode and its children.
      */
-    private void processGradingNodeRecursive(CombineNode node, double scaleFactor, StringBuilder sb, boolean includeTeacherFeedback) {
+    private void processGradingNodeRecursive(CombineNode node, double scaleFactor, boolean includeTeacherFeedback) {
         String title = node.getTitle();
         double actualScore = node.isNullified() ? 0 : Math.round(node.getActualScore() * scaleFactor * 100.0) / 100.0;
         double maxScore = Math.round(node.getMaxScore() * scaleFactor * 100.0) / 100.0;
 
-        appendCombineNodeStart(sb, node, title, maxScore, actualScore);
+        appendCombineNodeStart(node, title, maxScore, actualScore);
 
-        sb.append("    <" + HTML_DIV + " class=\"" + CSS_CONTENT + " " + CSS_INNER_CONTENT + "\">\n");
+        this.sb.append("    <" + HTML_DIV + " class=\"" + CSS_CONTENT + " " + CSS_INNER_CONTENT + "\">\n");
 
         if (node.isNullified()) {
-            appendNullificationInfo(sb, node.getNullifyReason());
+            appendNullificationInfo(node.getNullifyReason());
         }
 
-        appendDescription(sb, node.getDescription(), includeTeacherFeedback ? node.getInternalDescription() : null);
+        appendDescription(node.getDescription(), includeTeacherFeedback ? node.getInternalDescription() : null);
 
-        appendScoreCalculationInfo(sb, node.getFunction());
+        appendScoreCalculationInfo( node.getFunction());
 
-        sb.append("    </" + HTML_DIV + ">\n"); // Close inner-content div
+        this.sb.append("    </" + HTML_DIV + ">\n"); // Close inner-content div
 
         for (var child : node.getChildren()) {
             if (child instanceof TestNode testChild) {
-                processTestNode(testChild, scaleFactor, sb, includeTeacherFeedback);
+                processTestNode(testChild, scaleFactor, includeTeacherFeedback);
             } else if (child instanceof CombineNode combineChild) {
-                processGradingNodeRecursive(combineChild, scaleFactor, sb, includeTeacherFeedback);
+                processGradingNodeRecursive(combineChild, scaleFactor, includeTeacherFeedback);
             }
         }
 
-        sb.append("</" + HTML_DIV + ">\n"); // Close grading-node div
+        this.sb.append("</" + HTML_DIV + ">\n"); // Close grading-node div
     }
 
     /**
      * Processes a TestNode.
      */
-    private void processTestNode(TestNode testNode, double scaleFactor, StringBuilder sb, boolean includeTeacherFeedback) {
+    private void processTestNode(TestNode testNode, double scaleFactor, boolean includeTeacherFeedback) {
         double actualScore = testNode.isNullified() ? 0 : testNode.getActualScore();
         double maxScore = Math.round(testNode.getMaxScore() * scaleFactor * 100.0) / 100.0;
         double scaledActualScore = Math.round(actualScore * scaleFactor * 100.0) / 100.0;
 
-        appendTestNodeStart(sb, testNode, maxScore, testNode.getRawScore(), scaledActualScore);
+        appendTestNodeStart(testNode, maxScore, testNode.getRawScore(), scaledActualScore);
 
-        sb.append("    <" + HTML_DIV + " class=\"" + CSS_CONTENT + " " + CSS_INNER_CONTENT + "\">\n");
+        this.sb.append("    <" + HTML_DIV + " class=\"" + CSS_CONTENT + " " + CSS_INNER_CONTENT + "\">\n");
 
         if (testNode.isNullified() && testNode.getRawScore() != 0) {
-             appendNullificationInfo(sb, testNode.getNullifyReason());
+             appendNullificationInfo(testNode.getNullifyReason());
         }
 
-        appendDescription(sb, testNode.getDescription(), includeTeacherFeedback ? testNode.getInternalDescription() : null);
+        appendDescription(testNode.getDescription(), includeTeacherFeedback ? testNode.getInternalDescription() : null);
 
         // Group Student Feedback
         List<String> studentFeedbackList = testNode.getStudentFeedback();
         if (studentFeedbackList != null && !studentFeedbackList.isEmpty()) {
-            sb.append("    <" + HTML_H4 + ">" + escapeHtml(FEEDBACK_TITLE_STUDENT) + "</" + HTML_H4 + ">\n");
-            sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_CONTENT + "\">");
+            this.sb.append("    <" + HTML_H4 + ">" + escapeHtml(FEEDBACK_TITLE_STUDENT) + "</" + HTML_H4 + ">\n");
+            this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_CONTENT + "\">");
             for (String feedback : studentFeedbackList) {
-                sb.append(feedback).append("<br>\n");
+                this.sb.append(escapeHtml(feedback)).append("<br>\n");
             }
-            sb.append("  </" + HTML_DIV + ">\n"); 
+            this.sb.append("  </" + HTML_DIV + ">\n"); 
         }
 
         // Group Teacher Feedback
         if (includeTeacherFeedback) {
             List<String> teacherFeedbackList = testNode.getTeacherFeedback();
             if (teacherFeedbackList != null && !teacherFeedbackList.isEmpty()) {
-                sb.append("    <" + HTML_H4 + ">" + escapeHtml(FEEDBACK_TITLE_TEACHER) + "</" + HTML_H4 + ">\n");
-                sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_CONTENT + "\">");
+                this.sb.append("    <" + HTML_H4 + ">" + escapeHtml(FEEDBACK_TITLE_TEACHER) + "</" + HTML_H4 + ">\n");
+                this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_CONTENT + "\">");
                 for (String feedback : teacherFeedbackList) {
-                    sb.append(feedback).append("<br>\n");
+                    this.sb.append(escapeHtml(feedback)).append("<br>\n");
                 }
-                 sb.append("  </" + HTML_DIV + ">\n");
+                this.sb.append("  </" + HTML_DIV + ">\n");
             }
         }
 
-        sb.append("    </" + HTML_DIV + ">\n"); // Close inner-content div
+        this.sb.append("    </" + HTML_DIV + ">\n"); // Close inner-content div
 
-        sb.append("</" + HTML_DIV + ">\n"); // Close test-ref div
+        this.sb.append("</" + HTML_DIV + ">\n"); // Close test-ref div
     }
 
     /** Appends the starting divs and title container for a CombineNode. */
-    private void appendCombineNodeStart(StringBuilder sb, CombineNode node, String title, double maxScore, double actualScore) {
-        sb.append("<" + HTML_DIV + " class=\"" + CSS_GRADING_NODE + " " + CSS_INDENT_PREFIX + node.getIndentLevel() + "\">\n");
-        sb.append("  <" + HTML_DIV + " class=\"" + CSS_TITLE_CONTAINER + "\" style=\"padding-bottom: 5px;\">\n"); // Inline style kept for now
+    private void appendCombineNodeStart(CombineNode node, String title, double maxScore, double actualScore) {
+        this.sb.append("<" + HTML_DIV + " class=\"" + CSS_GRADING_NODE + " " + CSS_INDENT_PREFIX + node.getIndentLevel() + "\">\n");
+        this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_TITLE_CONTAINER + "\" style=\"padding-bottom: 5px;\">\n"); // Inline style kept for now
         String titleText = node.getRefId().equals("root") ? ROOT_NODE_TITLE : escapeHtml(title);
-        sb.append("    <" + HTML_P + ">" + String.format("%s [max. %.2f]",
-                titleText, maxScore) + "</" + HTML_P + ">\n");
-        sb.append("    <" + HTML_SPAN + " class=\"" + CSS_TITLE_RESULT + "\">" + String.format("[actual score. %.2f]", actualScore) + "</" + HTML_SPAN + ">\n");
-        sb.append("    <" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + " " + CSS_INNER_COLLAPSIBLE + "\">" + DETAILS_BUTTON_TEXT + "</" + HTML_BUTTON + ">\n");
-        sb.append("  </" + HTML_DIV + ">\n"); // Close title-container div
+        this.sb.append("    <" + HTML_P + ">" + String.format("%s [max. %.2f]",
+            titleText, maxScore) + "</" + HTML_P + ">\n");
+        this.sb.append("    <" + HTML_SPAN + " class=\"" + CSS_TITLE_RESULT + "\">" + String.format("[actual score. %.2f]", actualScore) + "</" + HTML_SPAN + ">\n");
+        this.sb.append("    <" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + " " + CSS_INNER_COLLAPSIBLE + "\">" + DETAILS_BUTTON_TEXT + "</" + HTML_BUTTON + ">\n");
+        this.sb.append("  </" + HTML_DIV + ">\n"); // Close title-container div
     }
 
     /** Appends the starting divs and title container for a TestNode. */
-    private void appendTestNodeStart(StringBuilder sb, TestNode testNode, double maxScore, double rawScore, double actualScore) {
+    private void appendTestNodeStart(TestNode testNode, double maxScore, double rawScore, double actualScore) {
         int indentLevel = testNode.getIndentLevel();
-        sb.append("<" + HTML_DIV + " class=\"" + CSS_TEST_REF + " " + CSS_INDENT_PREFIX + indentLevel + "\">\n");
+        this.sb.append("<" + HTML_DIV + " class=\"" + CSS_TEST_REF + " " + CSS_INDENT_PREFIX + indentLevel + "\">\n");
         String titleClass = rawScore == 0 ? CSS_TITLE_CONTAINER + " " + CSS_BOLD : CSS_TITLE_CONTAINER;
-        sb.append("  <" + HTML_DIV + " class=\"" + titleClass + "\">\n");
-        sb.append("    <" + HTML_P + ">" + escapeHtml(testNode.getTitle()) + String.format(" [max. %.2f]", maxScore) + "</" + HTML_P + ">\n");
+        this.sb.append("  <" + HTML_DIV + " class=\"" + titleClass + "\">\n");
+        this.sb.append("    <" + HTML_P + ">" + escapeHtml(testNode.getTitle()) + String.format(" [max. %.2f]", maxScore) + "</" + HTML_P + ">\n");
 
         // Build result text
         StringBuilder resultText = new StringBuilder();
@@ -260,15 +273,15 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
         if (rawScore != 0 && testNode.isNullified()) {
             resultText.append(NULLIFIED_SUFFIX);
         }
-        sb.append("    <" + HTML_SPAN + " class=\"" + CSS_TITLE_RESULT + "\">" + resultText.toString() + "</" + HTML_SPAN + ">\n");
-        sb.append("    <" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + " " + CSS_INNER_COLLAPSIBLE + "\">" + DETAILS_FEEDBACK_BUTTON_TEXT + "</" + HTML_BUTTON + ">\n");
-        sb.append("  </" + HTML_DIV + ">\n"); // Close title-container div
+        this.sb.append("    <" + HTML_SPAN + " class=\"" + CSS_TITLE_RESULT + "\">" + resultText.toString() + "</" + HTML_SPAN + ">\n");
+        this.sb.append("    <" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + " " + CSS_INNER_COLLAPSIBLE + "\">" + DETAILS_FEEDBACK_BUTTON_TEXT + "</" + HTML_BUTTON + ">\n");
+        this.sb.append("  </" + HTML_DIV + ">\n"); // Close title-container div
     }
 
     /** Appends nullification reason if present. */
-    private void appendNullificationInfo(StringBuilder sb, String reason) {
+    private void appendNullificationInfo(String reason) {
          if (reason != null && !reason.isEmpty()) {
-            sb.append("  <" + HTML_DIV + " class=\"" + CSS_NULLIFY_REASON + "\">")
+            this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_NULLIFY_REASON + "\">")
               .append(NULLIFIED_REASON_PREFIX)
               .append(escapeHtml(reason))
               .append("</" + HTML_DIV + ">\n");
@@ -276,83 +289,126 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
     }
 
     /** Appends description and optional internal description. */
-    private void appendDescription(StringBuilder sb, String description, String internalDescription) {
+    private void appendDescription(String description, String internalDescription) {
         if (description != null && !description.isEmpty()) {
-            sb.append("  <" + HTML_P + ">" + escapeHtml(description) + "</" + HTML_P + ">\n");
+            this.sb.append("  <" + HTML_P + ">" + escapeHtml(description) + "</" + HTML_P + ">\n");
         }
         // Internal description is appended only if it exists (controlled by includeTeacherFeedback flag earlier)
         if (internalDescription != null && !internalDescription.isEmpty()) {
-             sb.append("  <" + HTML_P + "><" + HTML_I + ">" + INTERNAL_FEEDBACK_PREFIX + escapeHtml(internalDescription) + "</" + HTML_I + "></" + HTML_P + ">\n");
+             this.sb.append("  <" + HTML_P + "><" + HTML_I + ">" + INTERNAL_FEEDBACK_PREFIX + escapeHtml(internalDescription) + "</" + HTML_I + "></" + HTML_P + ">\n");
         }
     }
 
     /** Appends score calculation info. */
-    private void appendScoreCalculationInfo(StringBuilder sb, String function) {
+    private void appendScoreCalculationInfo(String function) {
         if (function != null && !function.isEmpty()) {
             String calculationText = SCORE_CALC_PREFIX + escapeHtml(function) + SCORE_CALC_SUFFIX;
-            sb.append("  <" + HTML_P + "><" + HTML_EM + ">" + calculationText + "</" + HTML_EM + "></" + HTML_P + ">\n");
+            this.sb.append("  <" + HTML_P + "><" + HTML_EM + ">" + calculationText + "</" + HTML_EM + "></" + HTML_P + ">\n");
         }
     }
 
-    private void initializeHtmlDocument(StringBuilder sb) {
-        sb.append("<!DOCTYPE html>\n");
-        sb.append("<html lang=\"en\">\n");
+    private void initializeHtmlDocument() {
+        this.sb.append("<!DOCTYPE html>\n");
+        this.sb.append("<html lang=\"en\">\n");
     }
 
-    private void addHeadSection(StringBuilder sb) {
-        sb.append("<head>\n");
-        sb.append("  <meta charset=\"UTF-8\">\n");
-        sb.append("  <title>Evaluation Report</title>\n");
-        sb.append("  <style>\n")
+    private void addHeadSection() {
+        this.sb.append("<head>\n");
+        this.sb.append("  <meta charset=\"UTF-8\">\n");
+        this.sb.append("  <title>Evaluation Report</title>\n");
+        this.sb.append("  <style>\n")
           .append(getCommonStyles())
           .append("\n  </style>\n");
-        sb.append("  <script>\n")
+        this.sb.append("  <script>\n")
            .append(getCommonScript())
            .append("\n  </script>\n");
-        sb.append("</head>\n");
+        this.sb.append("</head>\n");
     }
 
-    private void addBodySection(StringBuilder sb) {
-        sb.append("<body>\n");
+    private void addBodySection() {
+        this.sb.append("<body>\n");
     }
 
-    private void addCollapsibleFeedbackSection(StringBuilder sb, String title) {
-        sb.append("<" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + "\">\n")
+    private void addCollapsibleFeedbackSection(String title) {
+        this.sb.append("<" + HTML_BUTTON + " class=\"" + CSS_COLLAPSIBLE + "\">\n")
           .append("  <" + HTML_H1 + ">" + escapeHtml(title) + "</" + HTML_H1 + ">\n")
           .append("</" + HTML_BUTTON + ">\n");
         // Content div is opened here, closed after content is added
-        sb.append("<" + HTML_DIV + " class=\"content\">\n");
+        this.sb.append("<" + HTML_DIV + " class=\"content\">\n");
     }
     
-    private void addExpandCollapseAllButtons(StringBuilder sb) {
-        sb.append("  <" + HTML_DIV + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTONS + "\">\n")
+    private void addExpandCollapseAllButtons() {
+        this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTONS + "\">\n")
         .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"expand-all\">Expand All</" + HTML_BUTTON + ">\n")
         .append("    <" + HTML_BUTTON + " class=\"" + CSS_EXPAND_COLLAPSE_BUTTON + "\" id=\"collapse-all\">Collapse All</" + HTML_BUTTON + ">\n")
         .append("  </" + HTML_DIV + ">\n");
     }
 
-    private void addStudentFeedbackList(StringBuilder sb, SeparateTestFeedbackType separateTestFeedback) {
-        addFeedbackListSection(sb, FEEDBACK_TITLE_STUDENT,
+    private void addStudentFeedbackList(SeparateTestFeedbackType separateTestFeedback) {
+        addFeedbackListSection(FEEDBACK_TITLE_STUDENT,
             separateTestFeedback.getSubmissionFeedbackList().getStudentFeedback());
     }
 
-    private void addTeacherFeedbackList(StringBuilder sb, SeparateTestFeedbackType separateTestFeedback) {
-        addFeedbackListSection(sb, FEEDBACK_TITLE_TEACHER,
+    private void addTeacherFeedbackList(SeparateTestFeedbackType separateTestFeedback) {
+        addFeedbackListSection(FEEDBACK_TITLE_TEACHER,
             separateTestFeedback.getSubmissionFeedbackList().getTeacherFeedback());
     }
 
-    private void addFeedbackListSection(StringBuilder sb, String title, List<FeedbackType> feedbackList) {
-        sb.append("  <" + HTML_H2 + ">" + escapeHtml(title) + "</" + HTML_H2 + ">\n");
-        sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_LIST + "\">\n");
+    private void addFeedbackListSection(String title, List<FeedbackType> feedbackList) {
+        this.sb.append("  <" + HTML_H2 + ">" + escapeHtml(title) + "</" + HTML_H2 + ">\n");
+        this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_LIST + "\">\n");
         if (feedbackList != null && !feedbackList.isEmpty()) {
             for (FeedbackType feedback : feedbackList) {
                 // Assuming feedback content is safe HTML/text
-                 sb.append(feedback.getContent().getValue()).append("\n");
+                 this.sb.append(feedback.getContent().getValue()).append("\n");
+                 if (feedback.getFilerefs() != null && !feedback.getFilerefs().getFileref().isEmpty()) {
+                    this.sb.append("<br>\n");
+                    addFileRefDownloadLinks(feedback.getFilerefs().getFileref());
+                 }
             }
         } else {
-            sb.append("    <" + HTML_P + "><" + HTML_I + ">" + NO_FEEDBACK_MSG + "</" + HTML_I + "></" + HTML_P + ">\n");
+            this.sb.append("    <" + HTML_P + "><" + HTML_I + ">" + NO_FEEDBACK_MSG + "</" + HTML_I + "></" + HTML_P + ">\n");
         }
-        sb.append("  </" + HTML_DIV + ">\n");
+        this.sb.append("  </" + HTML_DIV + ">\n");
+    }
+
+    /**
+     * Adds download links for all fileRefs in the given list to the html document
+     */
+    private void addFileRefDownloadLinks(List<FilerefType> fileRefs) {
+        for (FilerefType fileRef : fileRefs) {
+            String refId = fileRef.getRefid();
+            EmbeddedTxtFileType embeddedTxtFile = getEmbeddedTxtFileByFileRefId(refId);
+            if (embeddedTxtFile == null) {
+                this.sb.append("<p style=\"color: red;\">Error: File Ref found in Feedback but response file does not contain a embedded txt file</p>");
+                continue;
+            }
+
+            // Convert embedded txt file to base64
+            String embeddedTxtContent = embeddedTxtFile.getValue();
+            String base64Content = Base64.getEncoder().encodeToString(embeddedTxtContent.getBytes());
+
+            // Create html for download link
+            String linkHTML = "  <a style=\"padding: 20px 0 0 20px; display: block;\" href=\"data:text/plain;base64," +
+                base64Content + "\" download=\"" + embeddedTxtFile.getFilename() +
+                "\">" + embeddedTxtFile.getFilename() + "</a>\n";
+            this.sb.append(linkHTML);
+        }
+        this.sb.append("<br>");
+    }
+
+    /**
+     * Returns the embedded txt file type for a given file ref id.
+     * Returns null if response file does not exist or if it does not
+     * habe an embedded txt file
+     */
+    private EmbeddedTxtFileType getEmbeddedTxtFileByFileRefId(String refId) {
+        for (ResponseFileType responseFile : this.responseFiles.getFile()) {
+            if (responseFile.getId().equals(refId) && responseFile.getEmbeddedTxtFile() != null) {
+                return responseFile.getEmbeddedTxtFile();
+            }
+        }
+        return null;
     }
 
     // Style and Script
@@ -496,8 +552,8 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
                    .replace("'", "&#39;");
     }
 
-    private void finalizeHtmlDocument(StringBuilder sb) {
-        sb.append("</body>\n");
-        sb.append("</html>\n");
+    private void finalizeHtmlDocument() {
+        this.sb.append("</body>\n");
+        this.sb.append("</html>\n");
     }
 } 

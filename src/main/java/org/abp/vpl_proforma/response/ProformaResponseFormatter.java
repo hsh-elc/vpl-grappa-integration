@@ -8,6 +8,7 @@ import proforma.xml21.GradesTestRefChildType;
 import proforma.xml21.GradingHintsType;
 import proforma.xml21.TestsType;
 import proforma.xml21.ResponseType;
+import proforma.xml21.ResponseFilesType;
 import proforma.xml21.ResultType;
 import proforma.xml21.SeparateTestFeedbackType;
 import proforma.xml21.SubtestResponseType;
@@ -61,11 +62,12 @@ public class ProformaResponseFormatter {
             htmlGenerator.generateReport();
         } else {
             SeparateTestFeedbackType separateTestFeedback = this.responsePojo.getSeparateTestFeedback();
-            createSeparateTestFeedbackResponseHTML(separateTestFeedback, maxScoreLMS);
+            ResponseFilesType responseFiles = this.responsePojo.getFiles();
+            createSeparateTestFeedbackResponseHTML(separateTestFeedback, responseFiles, maxScoreLMS);
         }
     }
 
-    private void createSeparateTestFeedbackResponseHTML(SeparateTestFeedbackType separateTestFeedback, double maxScoreLMS) {        
+    private void createSeparateTestFeedbackResponseHTML(SeparateTestFeedbackType separateTestFeedback, ResponseFilesType responseFiles, double maxScoreLMS) {
         // Process scores and grading structure
         Map<String, Map<String, Double>> scores = processAllTestScores(separateTestFeedback.getTestsResponse());
         CombineNode gradingStructure = processGradingNode(taskGradingHintsElem.getRoot(), 
@@ -84,7 +86,13 @@ public class ProformaResponseFormatter {
         }
         
         // Output HTML documents
-        SeparateTestFeedbackGenerator htmlGenerator = new SeparateTestFeedbackGenerator(separateTestFeedback, gradingStructure, scaleFactor, hasInternalError);
+        SeparateTestFeedbackGenerator htmlGenerator = new SeparateTestFeedbackGenerator(
+            separateTestFeedback,
+            responseFiles,
+            gradingStructure,
+            scaleFactor,
+            hasInternalError
+        );
         htmlGenerator.generateReport();
 
         // Output debugging information
