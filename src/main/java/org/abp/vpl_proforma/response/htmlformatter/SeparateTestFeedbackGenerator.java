@@ -222,7 +222,7 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
             this.sb.append("    <" + HTML_H4 + ">" + escapeHtml(FEEDBACK_TITLE_STUDENT) + "</" + HTML_H4 + ">\n");
             this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_CONTENT + "\">");
             for (String feedback : studentFeedbackList) {
-                this.sb.append(escapeHtml(feedback)).append("<br>\n");
+                this.sb.append(feedback).append("<br>\n");
             }
             this.sb.append("  </" + HTML_DIV + ">\n"); 
         }
@@ -234,7 +234,7 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
                 this.sb.append("    <" + HTML_H4 + ">" + escapeHtml(FEEDBACK_TITLE_TEACHER) + "</" + HTML_H4 + ">\n");
                 this.sb.append("  <" + HTML_DIV + " class=\"" + CSS_FEEDBACK_CONTENT + "\">");
                 for (String feedback : teacherFeedbackList) {
-                    this.sb.append(escapeHtml(feedback)).append("<br>\n");
+                    this.sb.append(feedback).append("<br>\n");
                 }
                 this.sb.append("  </" + HTML_DIV + ">\n");
             }
