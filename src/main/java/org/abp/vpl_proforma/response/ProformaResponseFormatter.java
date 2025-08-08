@@ -220,7 +220,11 @@ public class ProformaResponseFormatter {
                             Map<String, Map<String, Double>> scoresMap, int indentLevel,
                             List<Double> childScores, List<GradingNode> processedChildren) {
         String refId = testRef.getRef();
-        String subRefId = testRef.getSubRef() != null ? testRef.getSubRef() : "";
+        TestResponseType testResponse = findTestResponseById(refId, testsResponse);
+        if (null == testResponse) {
+            throw new IllegalStateException("Unable to fetch test response from ref id in grading hints");
+        }
+        String subRefId = testRef.getSubRef() != null && testResponse.getSubtestsResponse() != null ? testRef.getSubRef() : "";
         
         // Get or generate title and description
         String title = testRef.getTitle() != null ? testRef.getTitle() : "";
@@ -299,6 +303,14 @@ public class ProformaResponseFormatter {
         }
         return null;
     }
+
+    private TestResponseType findTestResponseById(String testResponseId, TestsResponseType testsResponse) {
+        TestResponseType testResponse = testsResponse.getTestResponse().stream()
+            .filter(test -> testResponseId.equals(test.getId()))
+            .findFirst()
+            .orElse(null);
+        return testResponse;
+    }
     
     /**
      * Processes and extracts student and teacher feedback from the test response element.
@@ -313,10 +325,7 @@ public class ProformaResponseFormatter {
     private void processTestFeedback(List<String> studentFeedback, List<String> teacherFeedback,
                                 TestsResponseType testsResponse, String refId, String subRefId) {
         // Find the test response with matching refId
-        TestResponseType testResponse = testsResponse.getTestResponse().stream()
-                .filter(test -> refId.equals(test.getId()))
-                .findFirst()
-                .orElse(null);
+        TestResponseType testResponse = findTestResponseById(refId, testsResponse);
 
         if (testResponse == null) {
             return;
