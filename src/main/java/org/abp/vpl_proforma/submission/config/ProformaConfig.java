@@ -42,7 +42,8 @@ public class ProformaConfig {
                 if (line.startsWith("export ")) {
                     String[] parts = line.replace("export ", "").split("=", 2);
                     if (parts.length == 2) {
-                        configMap.put(parts[0].trim(), parts[1].replaceAll("\"", "").trim());
+                        String value = parts[1].substring(1, parts[1].length() - 1); // Remove front and trailing " or '
+                        configMap.put(parts[0].trim(), value.trim());
                     }
                 }
             }
