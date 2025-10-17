@@ -57,7 +57,7 @@ if (( java_major < 17 )); then
     exit 1
 fi
 
-if [ -f "ProformaFormatter-1.0.0-fat-jar-with-dependencies.jar" ]; then
+if [ -f "ProformaFormatter-1.0.1-fat-jar-with-dependencies.jar" ]; then
     # Concatenate all file names into a single string separated by spaces
     file_list=$(printf "%s " "${file_array[@]}")
 
@@ -67,13 +67,13 @@ if [ -f "ProformaFormatter-1.0.0-fat-jar-with-dependencies.jar" ]; then
         
         cat vpl_environment.sh >> vpl_execution
         # Call Java program and pass the concatenated file names as a single argument
-        echo "java -jar ProformaFormatter-1.0.0-fat-jar-with-dependencies.jar $file_list $task_file_name" >> vpl_execution
+        echo "java -jar ProformaFormatter-1.0.1-fat-jar-with-dependencies.jar $file_list $task_file_name" >> vpl_execution
     else
         echo "Task file missing. Task file must be either a zip or xml file. Please upload task file as follow: task/{{taskFileNameZipOrXMl}}"
         
     fi
 else 
-    echo "Missing file ProformaFormatter-1.0.0-fat-jar-with-dependencies.jar. Make sure the mentioned file is included in the 'Execution files' list"
+    echo "Missing file ProformaFormatter-1.0.1-fat-jar-with-dependencies.jar. Make sure the mentioned file is included in the 'Execution files' list"
 fi
 
 chmod +x vpl_execution
