@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.abp.vpl_proforma.response.ProformaResponseFormatter;
+import org.abp.vpl_proforma.response.HTMLResponseGenerator;
+import org.abp.vpl_proforma.response.MergedTestFeedbackGenerator;
+import org.abp.vpl_proforma.response.SeparateTestFeedbackGenerator;
 import org.abp.vpl_proforma.submission.ProformaSubmissionFormatter;
 import org.abp.vpl_proforma.submission.config.VplEnvironmentConfig;
 import org.abp.vpl_proforma.submission.config.ProformaConfig;
@@ -19,6 +21,8 @@ import proforma.util.ResponseLive;
 import proforma.util.resource.ResponseResource;
 import proforma.xml21.GradingHintsType;
 import proforma.xml21.ResponseType;
+import proforma.xml21.ResponseFilesType;
+import proforma.xml21.SeparateTestFeedbackType;
 import proforma.xml21.SubmissionType;
 import proforma.xml21.TaskType;
 import proforma.xml21.TestsType;
@@ -105,9 +109,22 @@ public class Main {
             ResponseResource responseResource = new ResponseResource(response.getContent());
             ResponseLive responseLive = new ResponseLive(responseResource);
             ResponseType responsePojo = responseLive.getResponse();
+
+            HTMLResponseGenerator htmlGenerator;
+            if (null != responsePojo.getMergedTestFeedback()) {
+                double grade = responsePojo.getMergedTestFeedback().getOverallResult().getScore().doubleValue();
+                String studentFeedback = responsePojo.getMergedTestFeedback().getStudentFeedback();
+                String teacherFeedback = responsePojo.getMergedTestFeedback().getTeacherFeedback();
+
+                htmlGenerator = new MergedTestFeedbackGenerator(studentFeedback, teacherFeedback, grade);
+            } else {
+                SeparateTestFeedbackType separateTestFeedback = responsePojo.getSeparateTestFeedback();
+                ResponseFilesType responseFiles = responsePojo.getFiles();
+                
+                htmlGenerator = new SeparateTestFeedbackGenerator(separateTestFeedback, taskPojo, responseFiles, maxScoreLMS);
+            }
             
-            ProformaResponseFormatter proformaResponseFormatter = new ProformaResponseFormatter(responsePojo, gradingHints, tests);
-            proformaResponseFormatter.processResult(maxScoreLMS);
+            htmlGenerator.generateReport();
         } catch (Exception e) {
             outputStudentError();
             outputTeacherError(e.getMessage(), e.getStackTrace());
