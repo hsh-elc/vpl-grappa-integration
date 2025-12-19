@@ -28,7 +28,7 @@ In Moodle, navigate to **Site administration > Plugins > Plugins overview > mod_
 1. **Add the Jail-Server URL**: Enter the Jail-Server URL you set up in the previous step into the **Execution servers list**.
 2. **Disable Other Servers**: Ensure all other server options are commented out or removed.
 
-   <img src="images/Execution_servers_config.png" width="761px">
+   <img src="images/VPL_Execution_servers_config.png" width="761px">
 
 
 ---
