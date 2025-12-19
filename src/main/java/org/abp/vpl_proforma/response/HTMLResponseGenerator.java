@@ -1,4 +1,4 @@
-package org.abp.vpl_proforma.response.htmlformatter;
+package org.abp.vpl_proforma.response;
 
 import java.util.Base64;
 
