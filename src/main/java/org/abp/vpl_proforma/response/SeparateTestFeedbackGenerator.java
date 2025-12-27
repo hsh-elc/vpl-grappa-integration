@@ -6,8 +6,6 @@ import proforma.xml21.SeparateTestFeedbackType;
 import proforma.xml21.TaskType;
 import proforma.xml21.ResponseFilesType;
 
-import java.util.Base64;
-
 /**
  * This class uses the implementation in Proforma21HtmlFeedbackGenerator for the generation
  * of separate HTML reports for student and teacher views.
@@ -32,31 +30,15 @@ public class SeparateTestFeedbackGenerator extends HTMLResponseGenerator {
         double finalGrade = Math.round(this.htmlGenerator.getScore().doubleValue() * this.htmlGenerator.getScaleFactor());
         
         // Output the reports
-        outputReport(studentHtml, teacherHtml, finalGrade);
+        super.outputReport(studentHtml, teacherHtml, finalGrade);
     }
 
     @Override
-    protected void outputReport(String studentHtml, String teacherHtml, double grade) {
-        outputStandardHeader(); // Print initial instructions
-
-        System.out.println("""
-            ///////////////////////////////
-            /// Student feedback //////////
-            ///////////////////////////////
-        """);
-        System.out.println(STUDENT_OUTPUT_HEADER_START);
-        System.out.println(OUTPUT_BASE64_PREFIX + Base64.getEncoder().encodeToString(studentHtml.getBytes()));
-        System.out.println(STUDENT_OUTPUT_HEADER_END);
-
-        System.out.println("""
-            ///////////////////////////////
-            /// Teacher feedback //////////
-            ///////////////////////////////
-        """);
-        System.out.println(OUTPUT_BASE64_PREFIX + Base64.getEncoder().encodeToString(teacherHtml.getBytes()));
-        
+    protected void outputGrade(double grade) {
         if (!htmlGenerator.getHasInternalError()) {
-            System.out.println(OUTPUT_GRADE_PREFIX + grade);
+            super.outputGrade(grade);
+        } else {
+            super.outputGrade(0.0);
         }
     }
 } 

@@ -41,7 +41,7 @@ public abstract class HTMLResponseGenerator {
         """);
         System.out.println(OUTPUT_BASE64_PREFIX + Base64.getEncoder().encodeToString(teacherHtml.getBytes()));
         
-        System.out.println(OUTPUT_GRADE_PREFIX + grade);
+        outputGrade(grade);
     }
 
     protected void outputStandardHeader() {
@@ -58,5 +58,12 @@ public abstract class HTMLResponseGenerator {
 
         -Text to copy:""");
         System.out.println(STUDENT_OUTPUT_HEADER_END);
+    }
+
+    /**
+     * Called by outputReport for printing the final grade to System.out.
+     */
+    protected void outputGrade(double grade) {
+        System.out.println(OUTPUT_GRADE_PREFIX + grade);
     }
 }
